@@ -1,0 +1,118 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# Full deployment (Core, Console, Enduser, SRA) on PostgreSQL, with Keymaster on Zookeeper
+
+# Zookeeper is configured without JAAS, hence empty KEYMASTER_USERNAME / KEYMASTER_PASSWORD
+# are passed to other containers
+
+version: '3.3'
+
+services:
+   keymaster:
+     image: zookeeper:3.7.0
+     restart: always
+
+   db:
+     image: postgres:14
+     restart: always
+     environment:
+       POSTGRES_DB: syncope
+       POSTGRES_USER: syncope
+       POSTGRES_PASSWORD: syncope
+
+   syncope:
+     depends_on:
+       - db
+       - keymaster
+     image: apache/syncope:${SYNCOPE_VERSION}
+     ports:
+       - "18080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker,postgresql
+       DB_URL: jdbc:postgresql://db:5432/syncope
+       DB_USER: syncope
+       DB_PASSWORD: syncope
+       DB_POOL_MAX: 10
+       DB_POOL_MIN: 2
+       OPENJPA_REMOTE_COMMIT: sjvm
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: http://syncope:8080/syncope/rest/
+
+   syncope-console:
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-console:${SYNCOPE_VERSION}
+     ports:
+       - "28080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: http://syncope-console:8080/syncope-console/
+
+   syncope-enduser:
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-enduser:${SYNCOPE_VERSION}
+     ports:
+       - "38080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: http://syncope-enduser:8080/syncope-enduser/
+
+   syncope-wa:
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-wa:${SYNCOPE_VERSION}
+     ports:
+       - "48080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: http://syncope-wa:8080/syncope-wa/
+       CAS_SERVER_NAME: http://localhost:48080
+
+   syncope-sra:
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-sra:${SYNCOPE_VERSION}
+     ports:
+       - "58080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: http://syncope-sra:8080/

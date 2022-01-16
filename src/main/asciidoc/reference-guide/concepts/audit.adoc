@@ -1,0 +1,81 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+=== Audit
+
+The audit feature allows to capture <<audit-events,events>> occurring within the <<core>> and to log relevant information
+about them. +
+By default, events are logged as entries into the `AuditEntry` table of the internal storage.
+
+Once events are reported, they can be used as input for external tools.
+
+[TIP]
+====
+An example of how audit entries can be extracted for reporting is shown by the <<audit-reportlet>>.
+====
+
+==== Audit Events
+
+The information provided for <<notification-events,notification events>> is also valid for audit events, including examples -
+except for the admin console <<console-configuration-audit,tooling>>, which is naturally distinct.
+
+==== Audit Appenders
+
+In addition to insertions into the `AuditEntry` table, events are also available for custom handling via Audit
+Appenders, based on https://logging.apache.org/log4j/2.x/manual/appenders.html[Apache Log4j 2 Appenders^]. +
+This allows to empower the available implementations or to write new ones in order to route audit messages, with optional
+transformation (rewrite), to files, queues, sockets, syslog, etc.
+
+Custom implementations must follow the
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/blob/syncope-{docVersion}/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/AuditAppender.java[AuditAppender^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/blob/master/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/AuditAppender.java[AuditAppender^]
+endif::[]
+interface.
+
+Some convenience implementations are provided, meant to serve as reference - see table below.
+
+[cols="1,2"]
+|===
+
+| 
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/blob/syncope-{docVersion}/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/DefaultAuditAppender.java[DefaultAuditAppender^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/blob/master/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/DefaultAuditAppender.java[DefaultAuditAppender^]
+endif::[]
+| This requires to specify (a) a set of events to which the appender is bound (log only if one of such events occurs)
+and (b) a target appender, e.g. one of https://logging.apache.org/log4j/2.x/manual/appenders.html[Apache Log4j 2 Appenders^]
+or a custom implementation.
+
+| 
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/blob/syncope-{docVersion}/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/DefaultRewriteAuditAppender.java[DefaultRewriteAuditAppender^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/blob/master/core/idrepo/logic/src/main/java/org/apache/syncope/core/logic/audit/DefaultRewriteAuditAppender.java[DefaultRewriteAuditAppender^]
+endif::[]
+| In addition, this requires to provide a
+https://logging.apache.org/log4j/2.x/log4j-core/apidocs/org/apache/logging/log4j/core/appender/rewrite/RewritePolicy.html[RewritePolicy^] 
+implementation, which allows to rewrite the original audit message into something more suitable to the target
+destination.
+
+|===

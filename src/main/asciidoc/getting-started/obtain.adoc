@@ -1,0 +1,689 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+== Obtain Apache Syncope
+
+There are several ways to obtain Apache Syncope: each of which has advantages or caveats for different types of users.
+
+=== Standalone
+
+The standalone distribution is the simplest way to start exploring Apache Syncope: it contains a fully working, in-memory
+Tomcat-based environment that can be easily grabbed and put at work on any modern laptop, workstation or server. 
+
+[CAUTION]
+.Target Audience
+First approach, especially with Admin and End-user UIs; does not require technical skills. +
+*Not meant for any production environment.*
+
+Getting ready in a few easy steps:
+
+. https://syncope.apache.org/downloads[download^] the standalone distribution
+. unzip the distribution archive
+. go into the created Apache Tomcat directory
+. start Apache Tomcat
+* GNU / Linux, Mac OS X
++
+[source,bash]
+----
+$ chmod 755 ./bin/*.sh
+$ ./bin/startup.sh
+----
++
+* Windows
++
+[source,dos]
+----
+> bin/startup.bat
+----
+
+[TIP]
+Please refer to the http://tomcat.apache.org/tomcat-9.0-doc/[Apache Tomcat documentation^] for more advanced setup and 
+instructions.
+
+[[standalone-components]]
+==== Components
+
+The set of provided components, including access URLs and credentials, is the same as reported for 
+<<paths-and-components,embedded mode>>, with the exception of log files, available here under `$CATALINA_HOME/logs`.
+
+[TIP]
+.Internal Storage
+====
+By default, the standalone distribution is configured to use an in-memory database instance.
+This means that every time Tomcat is shut down all changes that have been made are lost.
+
+If you want instead to make your changes persistent, replace
+
+[source,java]
+jdbc:h2:mem:syncopedb;DB_CLOSE_DELAY=-1
+
+with
+
+[source,java]
+jdbc:h2:~/syncopedb;DB_CLOSE_DELAY=-1
+
+in `webapps/syncope/WEB-INF/classes/core-embedded.properties` for `persistence.domain[0].jdbcURL` property (`Master`
+domain) and / or
+
+[source,java]
+jdbc:h2:mem:syncopetwo;DB_CLOSE_DELAY=-1
+
+with
+
+[source,java]
+jdbc:h2:~/syncopetwo;DB_CLOSE_DELAY=-1
+
+for `persistence.domain[1].jdbcURL` property (`Two` domain), from the Apache Tomcat directory.
+This will create H2 database files in the home directory of the user running Apache Syncope.
+
+Please refer to the http://www.h2database.com/[H2 documentation^] for more options.
+====
+
+=== Docker
+
+https://www.docker.com/[Docker^] images ready to use, published to https://hub.docker.com[Docker Hub^].
+
+[CAUTION]
+.Target Audience
+Getting up and running quickly on Docker. +
+*All configurations available to set, difficult customizations.*
+
+[WARNING]
+Working with these images requires to have Docker correctly installed and configured.
+
+[TIP]
+The Docker images can be used with orchestration tools as
+https://docs.docker.com/compose/[Docker Compose^] or https://kubernetes.io/[Kubernetes^].
+
+==== Docker images
+
+All images share a commong set of environment variables:
+
+* `KEYMASTER_ADDRESS`: Keymaster address
+* `KEYMASTER_USERNAME`: username for Keymaster authentication
+* `KEYMASTER_PASSWORD`: password for Keymaster authentication
+* `SERVICE_DISCOVERY_ADDRESS`: address to publish to Keymaster for the current instance
+* `ANONYMOUS_USER`: username for service-to-service authentication
+* `ANONYMOUS_KEY`: password for service-to-service authentication
+
+===== Core
+
+Apache Syncope Core, see <<a-birds-eye-view-on-the-architecture,above>> for information.
+
+Port exposed: `8080`.
+
+Environment variables:
+
+* `DB_URL`: JDBC URL of internal storage
+* `DB_USER`: username for internal storage authentication
+* `DB_PASSWORD`: password for internal storage authentication
+* `DB_POOL_MAX`: internal storage connection pool: ceiling
+* `DB_POOL_MIN`: internal storage connection pool: floor
+* `OPENJPA_REMOTE_COMMIT`: configure multiple instances, with high availability; valid values are the ones accepted by
+OpenJPA for
+http://openjpa.apache.org/builds/3.1.2/apache-openjpa/docs/ref_guide_event.html[remote event notification^] including
+`sjvm` (single instance)
+
+===== Console
+
+Apache Syncope Admin UI, see <<a-birds-eye-view-on-the-architecture,above>> for information.
+
+Port exposed: `8080`.
+
+===== Enduser
+
+Apache Syncope Enduser UI, see <<a-birds-eye-view-on-the-architecture,above>> for information.
+
+Port exposed: `8080`.
+
+===== WA
+
+Apache Syncope Web Access, see <<a-birds-eye-view-on-the-architecture,above>> for information.
+
+Port exposed: `8080`.
+
+Environment variables:
+
+* `CAS_SERVER_NAME`: public base URL to reach this instance; in case of clustered setup, this is the public-facing
+address and not the individual node address
+
+===== SRA
+
+Apache Syncope Secure Remote Access, see <<a-birds-eye-view-on-the-architecture,above>> for information.
+
+Port exposed: `8080`.
+
+==== Docker Compose samples
+
+Besides the ones reported below, more samples are
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/docker/src/main/resources/docker-compose[available^].
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/docker/src/main/resources/docker-compose[available^].
+endif::[]
+
+.Core, Admin UI and Enduser UI with PostgreSQL, with embedded Keymaster
+====
+The `docker-compose.yml` below will create and connect 4 Docker containers to provide an IdM-only, single
+instance, Apache Syncope deployment. All referenced images are available on Docker Hub.
+
+[NOTE]
+In this sample we are configuring an embedded, REST-based Keymaster hence `KEYMASTER_USERNAME` / `KEYMASTER_PASSWORD`
+are passed with same values as `ANONYMOUS_USER` / `ANONYMOUS_KEY`.
+
+[source,yaml,subs="verbatim,attributes"]
+----
+version: '3.3'
+
+services:
+   db: // <1>
+     image: postgres:latest
+     restart: always
+     environment:
+       POSTGRES_DB: syncope
+       POSTGRES_USER: syncope
+       POSTGRES_PASSWORD: syncope
+
+   syncope: // <2>
+     depends_on:
+       - db
+     image: apache/syncope:{docVersion}
+     ports:
+       - "18080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker,postgresql
+       DB_URL: jdbc:postgresql://db:5432/syncope
+       DB_USER: syncope
+       DB_PASSWORD: syncope
+       DB_POOL_MAX: 10
+       DB_POOL_MIN: 2
+       OPENJPA_REMOTE_COMMIT: sjvm
+       KEYMASTER_ADDRESS: http://localhost:8080/syncope/rest/keymaster
+       KEYMASTER_USERNAME: ${ANONYMOUS_USER}
+       KEYMASTER_PASSWORD: ${ANONYMOUS_KEY}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope:8080/syncope/rest/
+       ANONYMOUS_USER: ${ANONYMOUS_USER}
+       ANONYMOUS_KEY: ${ANONYMOUS_KEY}
+
+   syncope-console: // <3>
+     depends_on:
+       - syncope
+     image: apache/syncope-console:{docVersion}
+     ports:
+       - "28080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: https://syncope:8080/syncope/rest/keymaster
+       KEYMASTER_USERNAME: ${ANONYMOUS_USER}
+       KEYMASTER_PASSWORD: ${ANONYMOUS_KEY}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-console:8080/syncope-console/
+       ANONYMOUS_USER: ${ANONYMOUS_USER}
+       ANONYMOUS_KEY: ${ANONYMOUS_KEY}
+
+   syncope-enduser: // <4>
+     depends_on:
+       - syncope
+     image: apache/syncope-enduser:{docVersion}
+     ports:
+       - "38080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: https://syncope:8080/syncope/rest/keymaster
+       KEYMASTER_USERNAME: ${ANONYMOUS_USER}
+       KEYMASTER_PASSWORD: ${ANONYMOUS_KEY}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-enduser:8080/syncope-enduser/
+       ANONYMOUS_USER: ${ANONYMOUS_USER}
+       ANONYMOUS_KEY: ${ANONYMOUS_KEY}
+----
+<1> Database container for usage as internal storage, based on latest PostgreSQL image available
+<2> Apache Syncope Core, single instance, port `18080` exposed
+<3> Apache Syncope Admin UI, port `28080` exposed
+<4> Apache Syncope Enduser UI, port `38080` exposed
+====
+
+.Full deployment (Core, Admin UI, Enduser UI, WA, SRA) on PostgreSQL, with Keymaster on Zookeeper
+====
+The `docker-compose.yml` below will create and connect 7 Docker containers to provide a full-fledged, single
+instance, Apache Syncope deployment. All referenced images are available on Docker Hub.
+
+[NOTE]
+Zookeeper is configured without JAAS, hence empty `KEYMASTER_USERNAME` / `KEYMASTER_PASSWORD` are passed to other
+containers.
+
+[source,yaml,subs="verbatim,attributes"]
+----
+version: '3.3'
+
+services:
+   keymaster: // <1>
+     image: zookeeper:3.7.0
+     restart: always
+
+   db: // <2>
+     image: postgres:latest
+     restart: always
+     environment:
+       POSTGRES_DB: syncope
+       POSTGRES_USER: syncope
+       POSTGRES_PASSWORD: syncope
+
+   syncope: // <3>
+     depends_on:
+       - db
+       - keymaster
+     image: apache/syncope:{docVersion}
+     ports:
+       - "18080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker,postgresql
+       DB_URL: jdbc:postgresql://db:5432/syncope
+       DB_USER: syncope
+       DB_PASSWORD: syncope
+       DB_POOL_MAX: 10
+       DB_POOL_MIN: 2
+       OPENJPA_REMOTE_COMMIT: sjvm
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope:8080/syncope/rest/
+
+   syncope-console: // <4>
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-console:{docVersion}
+     ports:
+       - "28080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-console:8080/syncope-console/
+
+   syncope-enduser: // <5>
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-enduser:{docVersion}
+     ports:
+       - "38080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-enduser:8080/syncope-enduser/
+
+   syncope-wa: // <6>
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-wa:{docVersion}
+     ports:
+       - "48080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-wa:8080/syncope-wa/
+       CAS_SERVER_NAME: http://localhost:48080
+
+   syncope-sra: // <7>
+     depends_on:
+       - syncope
+       - keymaster
+     image: apache/syncope-sra:{docVersion}
+     ports:
+       - "58080:8080"
+     restart: always
+     environment:
+       SPRING_PROFILES_ACTIVE: docker
+       KEYMASTER_ADDRESS: keymaster:2181
+       KEYMASTER_USERNAME: ${KEYMASTER_USERNAME:-}
+       KEYMASTER_PASSWORD: ${KEYMASTER_PASSWORD:-}
+       SERVICE_DISCOVERY_ADDRESS: https://syncope-sra:8080/
+----
+<1> Apache Syncope Keymaster, based on https://zookeeper.apache.org/[Apache Zookeeper^]
+<2> Database container for usage as internal storage, based on latest PostgreSQL image available
+<3> Apache Syncope Core, single instance, port `18080` exposed
+<4> Apache Syncope Admin UI, port `28080` exposed
+<5> Apache Syncope Enduser UI, port `38080` exposed
+<6> Apache Syncope WA, port `48080` exposed
+<7> Apache Syncope SRA, port `58080` exposed
+====
+
+===== How to start the containers
+
+. Save the example file locally.
+. Download and start the containers:
++
+[source,bash]
+----
+$ docker-compose -f /path/to/docker-compose.yml up
+----
+
+The following services will be available:
+
+[cols="1,2"]
+|===
+
+| REST API reference
+| http://localhost:18080/syncope/
+
+| Admin UI
+| http://localhost:28080/syncope-console/ +
+Credentials: `admin` / `password`
+
+| End-user UI
+| http://localhost:38080/syncope-enduser/
+
+| WA (only with Example 2)
+| http://localhost:48080/syncope-wa/
+
+| SRA (only with Example 2)
+| http://localhost:58080/
+
+|===
+
+==== Kubernetes sample
+
+A set of example https://www.helm.sh/[Helm^] charts is
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/docker/src/main/resources/kubernetes[available^],
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/docker/src/main/resources/kubernetes[available^],
+endif::[]
+that can be used to install Apache Syncope directly in Kubernetes.
+
+Some assumptions are made:
+
+* a working Kubernetes Cluster to install into - if not available, follow this
+https://kubernetes.io/docs/setup/[tutorial^]
+[NOTE]
+Any other cloud provider or local install (e.g. AWS, Minikube, OpenShift) can be used
+
+* Helm installed - follow these https://docs.helm.sh/using_helm/[instructions^] if you don't
+
+* allow for https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/[dynamic provisioning^] of persistent
+volumes - otherwise you will need to manually create the volume
+
+The install process is broken into two separate Helm charts; this is due to the fact that Apache Syncope doesn't startup
+properly if the database used as internal storage is not fully initialized yet:
+
+* `postgres` chart; this will install the PostgreSQL database and configure a persistent volume and persistent volume
+claim to store the data
+* `syncope` chart; this is the actual Apache Syncope install, which will deploy three separate pods
+(Core, Console, and Enduser)
+
+image::SyncopeLayoutInK8s.png[]
+
+The installation steps are:
+
+. Open a terminal and navigate to the `kubernetes`
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/docker/src/main/resources/kubernetes[folder^],
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/docker/src/main/resources/kubernetes[folder^],
+endif::[]
+wherever you downloaded it
+
+. Set your actual values in `postgres/values.yaml`
+
+. Install PostgreSQL
++
+[source,bash]
+----
+helm install postgres --name postgres --namespace <YOUR_NAMESPACE> -f postgres/values.yaml
+----
++
+Wait until PostgreSQL is initialized (watch logs for confirmation)
+
+. Set your actual values in `syncope/values.yaml`
+
+. Install Apache Syncope
++
+[source,bash]
+----
+helm install syncope --name syncope --namespace <YOUR_NAMESPACE> -f syncope/values.yaml
+----
+
+=== Maven Project
+
+This is the *preferred method* for working with Apache Syncope, giving access to the whole set of customization
+and extension capabilities.
+
+[CAUTION]
+.Target Audience
+Provides access to the full capabilities of Apache Syncope, and almost all extensions that are possible. +
+*Requires Apache Maven (and potentially https://en.wikipedia.org/wiki/DevOps[DevOps^]) skills.*
+
+[[maven-prerequisites]]
+==== Prerequisites
+
+ . http://maven.apache.org/[Apache Maven^] (version 3.5.0 or higher) installed
+ . Some basic knowledge about Maven
+ . Some basic knowledge about http://maven.apache.org/guides/introduction/introduction-to-archetypes.html[Maven archetypes^].
+
+==== Create project
+
+Maven archetypes are templates of projects. Maven can generate a new project from such a template. 
+In the folder in which the new project folder should be created, type the command shown below. 
+On Windows, run the command on a single line and leave out the line continuation characters ('\').
+
+ifeval::["{snapshotOrRelease}" == "release"]
+
+[subs="verbatim,attributes"]
+----
+$ mvn archetype:generate \
+    -DarchetypeGroupId=org.apache.syncope \
+    -DarchetypeArtifactId=syncope-archetype \
+    -DarchetypeRepository=https://repo1.maven.org/maven2 \
+    -DarchetypeVersion={docVersion}
+----
+
+endif::[]
+
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+
+[subs="verbatim,attributes"]
+----
+$ mvn org.apache.maven.plugins:maven-archetype-plugin:2.4:generate \
+    -DarchetypeGroupId=org.apache.syncope \
+    -DarchetypeArtifactId=syncope-archetype \
+    -DarchetypeRepository=https://repository.apache.org/content/repositories/snapshots \
+    -DarchetypeVersion={docVersion}
+----
+
+[WARNING]
+====
+Once the Maven project is generated, add the following right before `</project>` in the root `pom.xml` of the 
+generated project:
+
+[source,xml]
+----
+<repositories>
+  <repository>
+    <id>apache.snapshots</id>
+    <url>https://repository.apache.org/content/repositories/snapshots/</url>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+----
+====
+
+endif::[]
+
+The archetype is configured with default values for all required properties; if you want to customize any of these 
+property values, type 'n' when prompted for confirmation.
+
+You will be asked for:
+
+groupId::
+    something like 'com.mycompany'
+artifactId::
+    something like 'myproject'
+version number::
+    You can use the default; it is good practice to have 'SNAPSHOT' in the version number during development and the 
+maven release plugin makes use of that string. But ensure to comply with the desired numbering scheme for your project.
+package name::
+    The java package name. A folder structure according to this name will be generated automatically; by default, equal 
+to the groupId.
+secretKey::
+    Provide any pseudo-random string here that will be used in the generated project for AES ciphering.
+anonymousKey:: 
+    Provide any pseudo-random string here that will be used as an authentication key for anonymous requests.
+
+Maven will create a project for you (in a newly created directory named after the value of the `artifactId` property 
+specified above) containing seven modules: `common`, `core`, `console`, `enduser`, `wa`, `sra` and `fit`.
+
+You are now able to perform the first build via
+
+[source,bash]
+$ mvn clean install
+
+After downloading all of the needed dependencies, the following artifacts will be produced:
+
+. `core/target/syncope.war`
+. `console/target/syncope-console.war`
+. `enduser/target/syncope-enduser.war`
+. `wa/target/syncope-wa.war`
+. `sra/target/syncope-sra.jar`
+
+If no failures are encountered, your basic Apache Syncope project is now ready to go.
+
+[NOTE]
+====
+Before actual deployment as executbale or onto a Java EE container, you need to further check the **Customization**
+chapter of the
+ifeval::["{backend}" == "html5"]
+https://syncope.apache.org/docs/reference-guide.html[Apache Syncope Reference Guide.]
+endif::[]
+ifeval::["{backend}" == "pdf"]
+https://syncope.apache.org/docs/reference-guide.pdf[Apache Syncope Reference Guide.]
+endif::[]
+====
+
+==== Embedded Mode
+
+Every Apache Syncope project has the ability to run a full-blown in-memory environment, particularly useful either when
+evaluating the product and during the development phase of an IdM solution.
+
+[WARNING]
+====
+Don't forget that this environment is completely in-memory: this means that every time Maven is stopped, all changes 
+made are lost.
+====
+
+From the top-level directory of your project, execute:
+
+[source,bash]
+$ mvn -P all clean install
+
+[WARNING]
+====
+The switch `-P all` is used here in order to build with all extensions available, with paths and settings
+configured for the embedded mode.
+
+When building for production, instead, it is recommended to check the **Customization** chapter of
+the
+ifeval::["{backend}" == "html5"]
+https://syncope.apache.org/docs/reference-guide.html[Apache Syncope Reference Guide.]
+endif::[]
+ifeval::["{backend}" == "pdf"]
+https://syncope.apache.org/docs/reference-guide.pdf[Apache Syncope Reference Guide.]
+endif::[]
+====
+
+then, from the `fit` subdirectory, execute:
+
+[source,bash]
+$ mvn -P embedded,all
+
+===== Paths and Components
+
+[cols="1,2"]
+|===
+
+| Log files
+| Available under `core/target/log`, `console/target/log`, `enduser/target/log`, `wa/target/log` and `sra/target/log`
+
+| ConnId bundles
+| Available under `core/target/bundles`
+
+| REST API reference
+| http://localhost:9080/syncope/
+
+| Admini UI
+| http://localhost:9080/syncope-console/ +
+Credentials: `admin` / `password`
+
+| End-user UI
+| http://localhost:9080/syncope-enduser/
+
+| WA
+| http://localhost:9080/syncope-wa/
+
+| SRA
+| http://localhost:8080/
+
+| Internal storage
+| A SQL web interface is available at http://localhost:9080/syncope/h2 +
+ +
+ Choose configuration 'Generic H2 (Embedded)' +
+ Insert `jdbc:h2:mem:syncopedb` as JDBC URL +
+ Click 'Connect' button
+
+| External resource: LDAP
+| An http://directory.apache.org/apacheds/[Apache DS^] instance is available. +
+You can configure any LDAP client (such as http://jxplorer.org/[JXplorer^], for example) with the following information: +
+ +
+ host: `localhost` +
+ port: `1389` +
+ base DN: `o=isp` +
+ bind DN: `uid=admin,ou=system` +
+ bind password: `secret`
+
+| External resource: SOAP and REST
+| Example SOAP and REST services are available at http://localhost:9080/syncope-fit-build-tools/cxf/
+
+| External resource: database
+| http://www.h2database.com/[H2^] TCP database is available. +
+ +
+ A SQL web interface is available at http://localhost:9082/ +
+ +
+ Choose configuration 'Generic H2 (Server)' +
+ Insert `jdbc:h2:tcp://localhost:9092/mem:testdb` as JDBC URL +
+ Set 'sa' as password +
+ Click 'Connect' button
+
+|===

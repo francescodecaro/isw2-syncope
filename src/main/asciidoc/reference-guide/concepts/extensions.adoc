@@ -1,0 +1,176 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+=== Extensions
+
+The _vanilla_ Apache Syncope deployment can be optional enriched with useful features via an Extension, instead of bloating
+every single deployment with unneeded libraries and configurations.
+
+With reference to <<architecture,architecture>>, an extension might add a <<rest>> endpoint, manage the
+<<persistence,persistence>> of additional entities, extend the <<security,security>> mechanisms, tweak the
+<<provisioning-layer,provisioning layer>>, add features to the <<admin-console-component>> or
+the <<enduser-component>>, or even bring all such things together.
+
+Extensions are available from different sources:
+
+. as Maven artifacts published from the Apache Syncope codebase, part of the official releases - this is the case of the
+ones detailed below;
+. as Maven artifacts published by third parties;
+. as part of a given deployment source code, as explained <<customization-extensions, in the following>>.
+
+==== Apache Camel Provisioning Manager
+
+This extension delegates the <<provisioning,provisioning>> process execution to a set of
+http://camel.apache.org[Apache Camel^] routes.
+
+The pre-loaded routes can be dynamically changed at runtime via REST or admin console, and modifications are immediately
+made available for processing.
+
+For example, on creating a new user, you may wish to send an email to an administrator; or if a user is
+reactivated, you may wish to reactivate the user's home page on a web server. +
+All these things and more are possible using the myriad of
+http://camel.apache.org/components.html[components^] that are available to be used in Apache Camel routes.
+
+[NOTE]
+.Extension Sources
+====
+The source code of this extension is available from the Apache Syncope
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/ext/camel[source tree^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/ext/camel[source tree^]
+endif::[]
+.
+====
+
+[[saml2sp4ui]]
+==== SAML 2.0 Service Provider for UI
+
+This extension can be leveraged to provide
+https://en.wikipedia.org/wiki/Security_Assertion_Markup_Language[SAML 2.0^]-based
+https://en.wikipedia.org/wiki/Single_sign-on[Single Sign-On^] access to the <<admin-console-component>>,
+the <<enduser-component>> or any other Java application dealing with the <<core>>.
+
+Once installed, one or more https://en.wikipedia.org/wiki/Identity_provider[Identity Providers^] can be imported from
+their https://en.wikipedia.org/wiki/SAML_2.0#SAML_2.0_Metadata[metadata^].
+For each Identity Provider, it is to configure which one of the attributes - returned as part of the assertion
+containing the attribute statements - is going to be used by Syncope to match the internal users.
+
+[NOTE]
+.Extension Sources
+====
+The source code of this extension is available from the Apache Syncope
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/ext/saml2sp4ui[source tree^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/ext/saml2sp4ui[source tree^]
+endif::[]
+.
+====
+
+[TIP]
+====
+This extension adds features to all components and layers that are available, and can be taken as reference when creating
+<<customization-extensions,new extensions>>.
+====
+
+[[oidcc4ui]]
+==== OpenID Connect Client for UI
+
+This extension can be leveraged to provide http://openid.net/connect/[OpenID Connect^]-based
+https://en.wikipedia.org/wiki/Single_sign-on[Single Sign-On^] access to the <<admin-console-component>>,
+the <<enduser-component>> or any other Java application dealing with the <<core>>.
+
+Once installed, one or more OpenID Providers can be created either from 
+the http://openid.net/specs/openid-connect-discovery-1_0.html[discovery document^] if it is supported or from inserting 
+manually the required attributes, in any case the `client_id` and the `client_secret` from the OAuth 2.0 credential and the issuer
+are required.
+After configuring the OpenID provider, the http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth[Authorization Code Flow^]
+is going to be implemented in order to reach the user information to be used by Syncope to match the internal users.
+
+
+[NOTE]
+.Extension Sources
+====
+The source code of this extension is available from the Apache Syncope
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/ext/oidcc4ui[source tree^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/ext/oidcc4ui[source tree^]
+endif::[]
+.
+====
+
+[TIP]
+====
+This extension adds features to all components and layers that are available, and can be taken as reference when creating
+<<customization-extensions,new extensions>>.
+====
+
+==== Elasticsearch
+
+This extension provides an alternate internal search engine for <<users-groups-and-any-objects>>, requiring an external 
+https://www.elastic.co/[Elasticsearch^] cluster.
+
+[WARNING]
+This extension supports Elasticsearch server versions starting from 7.x.
+
+[TIP]
+As search operations are central for different aspects of the <<provisioning,provisioning process>>, the global
+performance is expected to improve when using this extension.
+
+[NOTE]
+.Extension Sources
+====
+The source code of this extension is available from the Apache Syncope
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/ext/elasticsearch[source tree^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/ext/elasticsearch[source tree^]
+endif::[]
+.
+====
+
+==== SCIM
+
+http://www.simplecloud.info/[SCIM^] (System for Cross-domain Identity Management) 2.0 is the open API for managing
+identities, published under the IETF:
+
+. https://tools.ietf.org/html/rfc7642[Definitions, Overview, Concepts, and Requirements^]
+. https://tools.ietf.org/html/rfc7643[Core Schema^]
+. https://tools.ietf.org/html/rfc7644[Protocol^]
+
+This extension enables an additional `/scim` REST endpoint, implementing the communication according to the SCIM 2.0
+standard, in order to provision User, Enterprise User and Group SCIM entities to Apache Syncope.
+
+[NOTE]
+.Extension Sources
+====
+The source code of this extension is available from the Apache Syncope
+ifeval::["{snapshotOrRelease}" == "release"]
+https://github.com/apache/syncope/tree/syncope-{docVersion}/ext/scimv2[source tree^]
+endif::[]
+ifeval::["{snapshotOrRelease}" == "snapshot"]
+https://github.com/apache/syncope/tree/master/ext/scimv2[source tree^]
+endif::[]
+.
+====

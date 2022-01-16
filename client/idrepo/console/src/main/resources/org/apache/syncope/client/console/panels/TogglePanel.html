@@ -1,0 +1,134 @@
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org">
+  <wicket:head>
+    <style type="text/css">
+      div.toggle-menu {
+        display: none;
+        border-radius: 5px;
+        background-color: rgba(120, 120, 120, 0.96);
+        color: #fff;
+        position: fixed;
+        right: 30px;
+        top: 180px;
+        min-width: 250px;
+        z-index: 999 !important;
+      }
+
+      .modal-content div.toggle-menu {
+        top: 60px !important;
+      }
+
+      div.toggle-menu ul.menu {
+        list-style: outside none none;
+        margin: 0;
+        padding: 0;
+        list-style: outside none none;
+      }
+
+      div.toggle-menu ul.menu li {
+        display: block;
+        line-height: 1em;
+        vertical-align: middle;
+        padding: 0px 10px;
+      }
+
+      div.toggle-menu ul.menu li a i {
+        position: relative;
+        padding: 12px 15px 12px 5px;
+      }
+
+      div.toggle-menu div.header a:active,
+      div.toggle-menu div.header a:link,
+      div.toggle-menu div.header a:visited,
+      div.toggle-menu ul a:active,
+      div.toggle-menu ul a:link,
+      div.toggle-menu ul a:visited{
+        color: #fff;
+      }
+
+      div.toggle-menu ul li:hover {
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        font-weight: bold;
+      }
+
+      div.toggle-menu div.header {
+        background-color: rgba(0, 0, 0, 0);
+        position: relative;
+        font-size: 1.5em;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #aaa;
+      }
+
+      div.toggle-menu div.header a {
+        display: inline-table;
+        color: white !important;
+      }
+
+      div.toggle-menu div.header .close {
+        text-align: right;
+      }
+
+      /* Copy key to clipboard */
+      .copy-clipboard-feedback {
+        position: absolute;
+        top: -30px;
+
+        max-width: 200px;
+        max-height: 30px;
+
+        border-radius: 10px;
+        background: #00a65a;
+        padding: 5px;
+        text-align: center;
+        color: #FFF;
+        text-decoration: none;
+        font-weight: 400;
+        font-size: 14px;
+      }
+      .label-with-key {
+        cursor: pointer;
+      }
+    </style>
+  </wicket:head>
+  <wicket:extend>
+    <div wicket:id="togglePanelContainer" class="toggle-menu inactive-toggle-menu card">
+      <div class="header card-header">
+        <div class="label card-title">
+
+          <!-- Copy key to clipboard feedback -->
+          <div class="copy-clipboard-feedback" style="display: none"> 
+            <wicket:message key="copy_to_clipboard.feedback"/>
+          </div>
+          <label wicket:id="label" class="label-with-key" onclick="doCopyToClipboard(this)"/>
+
+        </div>
+        <div class="close card-tools">
+          <a wicket:id="close" href="#"><i class="fas fa-times"></i></a>
+        </div>
+      </div>
+      <wicket:child/>      
+    </div>
+
+    <script type="text/javascript" src="js/copyToClipboard.js"></script>
+  </wicket:extend>
+</html>
+
