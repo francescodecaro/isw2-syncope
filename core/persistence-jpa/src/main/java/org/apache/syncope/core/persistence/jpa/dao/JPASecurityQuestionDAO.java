@@ -52,12 +52,18 @@ public class JPASecurityQuestionDAO extends AbstractDAO<SecurityQuestion> implem
 
     @Override
     public void delete(final String key) {
+        LOG.debug("[SECURITY_QUESTION] key is=" + key);
+
         SecurityQuestion securityQuestion = find(key);
         if (securityQuestion == null) {
             return;
         }
 
+        LOG.debug("[SECURITY_QUESTION] securityQuestion is=" + securityQuestion);
+
+
         userDAO.findBySecurityQuestion(securityQuestion).forEach(user -> {
+            LOG.debug("[SECURITY_QUESTION] User is=" + user);
             user.setSecurityQuestion(null);
             user.setSecurityAnswer(null);
             userDAO.save(user);

@@ -73,27 +73,7 @@ public class SecurityQuestionDAOTest {
 
     @Before
     public void configure() {
-        SecurityQuestion existingSecurityQuestion = securityQuestionDAO.find("887028ea-66fc-41e7-b397-620d7ea6dfbb");
-        SecurityQuestion securityQuestion = entityFactory.newEntity(SecurityQuestion.class);
-        securityQuestion.setContent("Security Question 1?");
-        SecurityQuestion finalSecurityQuestion = securityQuestionDAO.save(securityQuestion);
 
-        // rossini -> "887028ea-66fc-41e7-b397-620d7ea6dfbb", verdi: null, others: new
-        userDAO.findAll(0, 100).forEach(u -> {
-            if (u.getUsername().equals("rossini")) {
-                u.setSecurityQuestion(existingSecurityQuestion);
-                u.setSecurityAnswer("Security Answer 1");
-                userDAO.save(u);
-            } else if (!u.getUsername().equals("verdi")) {
-                u.setSecurityQuestion(finalSecurityQuestion);
-                u.setSecurityAnswer("Security Answer 1");
-                userDAO.save(u);
-            }
-        });
-
-        int existingCount = userDAO.findBySecurityQuestion(existingSecurityQuestion).size();
-        int nullCount = userDAO.findBySecurityQuestion(null).size();
-        int newCount = userDAO.findBySecurityQuestion(finalSecurityQuestion).size();
     }
 
     @Parameterized.Parameters
@@ -169,6 +149,24 @@ public class SecurityQuestionDAOTest {
 
     @Test
     public void testDelete() {
+        SecurityQuestion existingSecurityQuestion = securityQuestionDAO.find("887028ea-66fc-41e7-b397-620d7ea6dfbb");
+        SecurityQuestion newSecurityQuestion = entityFactory.newEntity(SecurityQuestion.class);
+        newSecurityQuestion.setContent("Security Question 1?");
+        SecurityQuestion finalSecurityQuestion = securityQuestionDAO.save(newSecurityQuestion);
+
+        // rossini -> "887028ea-66fc-41e7-b397-620d7ea6dfbb", verdi: null, others: new
+        userDAO.findAll(0, 100).forEach(u -> {
+            if (u.getUsername().equals("rossini") && existingSecurityQuestion != null) {
+                u.setSecurityQuestion(existingSecurityQuestion);
+                u.setSecurityAnswer("Security Answer 1");
+                userDAO.save(u);
+            } else if (!u.getUsername().equals("verdi")) {
+                u.setSecurityQuestion(finalSecurityQuestion);
+                u.setSecurityAnswer("Security Answer 1");
+                userDAO.save(u);
+            }
+        });
+
         SecurityQuestion securityQuestion = securityQuestionDAO.find(deleteParameters.getKey());
         securityQuestionDAO.delete(deleteParameters.getKey());
         if (securityQuestion != null) {

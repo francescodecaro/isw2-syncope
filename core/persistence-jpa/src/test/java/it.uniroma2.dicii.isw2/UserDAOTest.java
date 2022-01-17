@@ -90,6 +90,10 @@ public class UserDAOTest {
         validAuthRealmsSet.add("c5b75db1-fce7-470f-b780-3b9934d82a9d");
         validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28");
 
+        Set<String> validAuthRealmsSet2 = new HashSet<>();
+        validAuthRealmsSet.add("c5b75db1-fce7-470f-b780-3b9934d82a9d");
+        validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28");
+
         Collection<String> validGroupsSet = Arrays.asList(new String[]{
             "37d15e4c-cdc1-460b-a591-8505c8133806",
             "f779c0d4-633b-4be5-8f57-32eb478a3ca5"
@@ -146,7 +150,7 @@ public class UserDAOTest {
                     new FindAllParameters(1, 1, 1 ),
                     new FindUsernameParameters("", null, null ),
                     new FindMembershipParameters("", true, null, null),
-                    new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.EMPTY_LIST, true),
+                    new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters("", null, true ),
                     new FindBySecurityQuestion("", 5 )
                 },
@@ -155,7 +159,7 @@ public class UserDAOTest {
                     new FindAllParameters(2, 3, 2 ),
                     new FindUsernameParameters(null, null, null ),
                     new FindMembershipParameters(null, true, null, null),
-                    new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.EMPTY_LIST, true),
+                    new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters(null, null, true ),
                     new FindBySecurityQuestion(null, 5 )
                 },
