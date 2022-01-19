@@ -144,6 +144,8 @@ public class SecurityQuestionDAOTest {
         }
         securityQuestion.setContent(saveParameters.getContent());
         securityQuestion = securityQuestionDAO.save(securityQuestion);
+        assertNotNull(securityQuestion);
+        assertNotNull(securityQuestion.getKey());
         assertEquals(saveParameters.getContent(), securityQuestion.getContent());
     }
 
