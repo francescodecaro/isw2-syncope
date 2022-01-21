@@ -95,6 +95,7 @@ public class UserDAOTest {
         linkedAccount.setSuspended(false);
         linkedAccount.add(applicationDAO.findPrivilege("postMighty"));
         linkedAccount.setResource(externalResource);
+        linkedAccount.setPassword("password", CipherAlgorithm.SHA);
         rossini.add(linkedAccount);
         userDAO.save(rossini);
     }

@@ -2501,6 +2501,11 @@ $$ }&#10;
             logout="0" csrf="1" routeType="PROTECTED"
             predicates="[{&quot;cond&quot;:null,&quot;factory&quot;:&quot;METHOD&quot;,&quot;args&quot;:&quot;GET&quot;}]"/>
 
+
+  <SRARoute id="27c4abc6-717e-432a-bb94-59e4768279ff" name="deleteRoute" target="http://httpbin.org:80"
+            logout="0" csrf="1" routeType="PUBLIC"
+            predicates="[{&quot;cond&quot;:null,&quot;factory&quot;:&quot;METHOD&quot;,&quot;args&quot;:&quot;GET&quot;}]"/>
+
   <SyncopeRole id="GROUP_OWNER"/>
   <SyncopeRole_entitlements role_id="GROUP_OWNER" entitlement="USER_SEARCH"/>
   <SyncopeRole_entitlements role_id="GROUP_OWNER" entitlement="USER_READ"/>
