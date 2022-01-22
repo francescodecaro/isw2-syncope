@@ -29,6 +29,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.syncope.common.lib.types.CipherAlgorithm;
 import org.apache.syncope.core.persistence.api.dao.*;
+import org.apache.syncope.core.persistence.api.entity.Realm;
 import org.apache.syncope.core.persistence.api.entity.Role;
 import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
@@ -345,17 +346,22 @@ public class UserDAOTest {
                 Collection<Role> roles = userDAO.findAllRoles(user);
                 assertEquals(findAllRolesAndGroupsParameters.getExpectedRoles().size(), roles.size());
                 roles.forEach(role -> {
-                    RoleParam expectedRole = findAllRolesAndGroupsParameters.getExpectedRoles().stream().filter(r -> r.getKey().equals(role.getKey())).findFirst().get();
+                    RoleParam expectedRole = findAllRolesAndGroupsParameters.getExpectedRoles()
+                            .stream().filter(r -> r.getKey().equals(role.getKey())).findFirst().get();
                     assertNotNull(expectedRole);
                     assertEquals(expectedRole.getEntitlements(), role.getEntitlements());
-                    assertEquals(expectedRole.getRealmsKeys(), role.getRealms().stream().map(r -> r.getKey()).collect(Collectors.toList()));
-                    assertEquals(expectedRole.getPrivilegesKeys(), role.getPrivileges().stream().map(p -> p.getKey()).collect(Collectors.toList()));
+                    List<String> realms = role.getRealms().stream().map(r -> r.getKey()).collect(Collectors.toList());
+                    assertEquals(expectedRole.getRealmsKeys(), realms);
+
+                    List<String> privileges = role.getPrivileges().stream().map(p -> p.getKey()).collect(Collectors.toList());
+                    assertEquals(expectedRole.getPrivilegesKeys(), privileges);
                 });
 
                 Collection<Group> groups = userDAO.findAllGroups(user);
                 assertEquals(findAllRolesAndGroupsParameters.getExpectedGroups().size(), groups.size());
                 groups.forEach(group -> {
-                    GroupParam expectedGroup = findAllRolesAndGroupsParameters.getExpectedGroups().stream().filter(g -> g.getKey().equals(group.getKey())).findFirst().get();
+                    GroupParam expectedGroup = findAllRolesAndGroupsParameters.getExpectedGroups().stream()
+                            .filter(g -> g.getKey().equals(group.getKey())).findFirst().get();
                     assertNotNull(expectedGroup);
                     assertEquals(expectedGroup.getName(), group.getName());
                     assertEquals(expectedGroup.getRealm(), group.getRealm().getKey());
@@ -384,7 +390,8 @@ public class UserDAOTest {
         assertEquals(linkedAccountExistsParameters.getLinkedAccounts().size(), linkedAccounts.size());
 
         ExternalResource externalResource = externalResourceDAO.find(linkedAccountExistsParameters.getResourceKey());
-        assertEquals(linkedAccountExistsParameters.isExpectedEmpty(), userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
+        assertEquals(linkedAccountExistsParameters.isExpectedEmpty(),
+                userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
     }
 
 

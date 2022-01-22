@@ -118,6 +118,7 @@ under the License.
         <artifactId>cargo-maven3-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
+          <skip>true</skip>
           <container>
             <containerId>tomcat9x</containerId>
             <zipUrlInstaller>
@@ -187,7 +188,7 @@ under the License.
               <goal>start</goal>
             </goals>
             <configuration>
-              <skip>${skipTests}</skip>
+              <skip>${skipCargo}</skip>
             </configuration>
           </execution>
           <execution>
@@ -197,7 +198,7 @@ under the License.
               <goal>stop</goal>
             </goals>
             <configuration>
-              <skip>${skipTests}</skip>
+              <skip>${skipCargo}</skip>
             </configuration>
           </execution>
         </executions>
