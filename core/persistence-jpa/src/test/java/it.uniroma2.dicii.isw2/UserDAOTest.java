@@ -28,11 +28,7 @@ import lombok.Data;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.syncope.common.lib.types.CipherAlgorithm;
-import org.apache.syncope.core.persistence.api.dao.ApplicationDAO;
-import org.apache.syncope.core.persistence.api.dao.ExternalResourceDAO;
-import org.apache.syncope.core.persistence.api.dao.SecurityQuestionDAO;
-import org.apache.syncope.core.persistence.api.dao.UserDAO;
-import org.apache.syncope.core.persistence.api.entity.EntityFactory;
+import org.apache.syncope.core.persistence.api.dao.*;
 import org.apache.syncope.core.persistence.api.entity.Role;
 import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
@@ -42,7 +38,6 @@ import org.apache.syncope.core.persistence.api.entity.user.UMembership;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
 import org.apache.syncope.core.spring.security.DelegatedAdministrationException;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,29 +72,7 @@ public class UserDAOTest {
     private SecurityQuestionDAO securityQuestionDAO;
 
     @Autowired
-    private ApplicationDAO applicationDAO;
-
-    @Autowired
     private ExternalResourceDAO externalResourceDAO;
-
-    @Autowired
-    private EntityFactory entityFactory;
-
-    @Before
-    public void configure() {
-        User rossini = userDAO.findByUsername("rossini");
-        ExternalResource externalResource = externalResourceDAO.find("ws-target-resource-timeout");
-        LinkedAccount linkedAccount = entityFactory.newEntity(LinkedAccount.class);
-        linkedAccount.setConnObjectKeyValue("connObjectKeyValue");
-        linkedAccount.setOwner(rossini);
-        linkedAccount.setSuspended(false);
-        linkedAccount.add(applicationDAO.findPrivilege("postMighty"));
-        linkedAccount.setResource(externalResource);
-        linkedAccount.setPassword("password", CipherAlgorithm.SHA);
-        rossini.add(linkedAccount);
-        userDAO.save(rossini);
-    }
-
 
     @Parameterized.Parameters
     public static Collection params() {
@@ -198,7 +171,7 @@ public class UserDAOTest {
                     new FindByTokenParameters("f21d52aa-e39e-4ec4-b3ed-21e3d3bd269a", userRossini, false ),
                     new FindBySecurityQuestionParameters("887028ea-66fc-41e7-b397-620d7ea6dfbb", 0 ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
-                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue", true, linkedAccountsParam)
+                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue", "ws-target-resource-timeout", true, linkedAccountsParam, false)
                 },
                 {
                     new FindKeyParameters("", null, null ),
@@ -209,7 +182,7 @@ public class UserDAOTest {
                     new FindByTokenParameters("", null, true ),
                     new FindBySecurityQuestionParameters("", 5 ),
                     new FindAllRolesAndGroupsParameters(null, Collections.emptyList(), true, Collections.emptyList()),
-                    new LinkedAccountExistsParameters("", "", false, Collections.emptyList())
+                    new LinkedAccountExistsParameters("", "", "", false, Collections.emptyList(), true)
                 },
                 {
                     new FindKeyParameters(null, null, null ),
@@ -220,7 +193,7 @@ public class UserDAOTest {
                     new FindByTokenParameters(null, null, true ),
                     new FindBySecurityQuestionParameters(null, 5 ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
-                    new LinkedAccountExistsParameters(null, null, false, Collections.emptyList())
+                    new LinkedAccountExistsParameters(null, null, null, false, Collections.emptyList(), true)
                 },
                 {
                     new FindKeyParameters("verd", null, null ),
@@ -231,7 +204,7 @@ public class UserDAOTest {
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                     new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 5 ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
-                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue2", false, linkedAccountsParam)
+                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue2", "ws-target-resource-timeout", false, linkedAccountsParam, true)
                 },
 
 
@@ -410,18 +383,8 @@ public class UserDAOTest {
         List<LinkedAccount> linkedAccounts = userDAO.findLinkedAccounts(linkedAccountExistsParameters.getUserKey());
         assertEquals(linkedAccountExistsParameters.getLinkedAccounts().size(), linkedAccounts.size());
 
-        linkedAccounts = userDAO.findLinkedAccountsByPrivilege(applicationDAO.findPrivilege("postMighty"));
-        assertEquals(1, linkedAccounts.size());
-        System.out.println("[LINKED_ACCOUNT] " + linkedAccounts.get(0).getResource() + ";" + linkedAccounts.get(0).getConnObjectKeyValue());
-
-        ExternalResource externalResource = externalResourceDAO.find("ws-target-resource-timeout");
-        System.out.println("[EXTERNAL_RESOURCE] " + externalResource);
-        linkedAccounts = userDAO.findLinkedAccountsByResource(externalResource);
-        assertEquals(1, linkedAccounts.size());
-
-        // BUG
-        assertNotEquals(linkedAccountExistsParameters.isExpected(), userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
-//        assertFalse(userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
+        ExternalResource externalResource = externalResourceDAO.find(linkedAccountExistsParameters.getResourceKey());
+        assertEquals(linkedAccountExistsParameters.isExpectedEmpty(), userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
     }
 
 
@@ -507,8 +470,10 @@ public class UserDAOTest {
     static class LinkedAccountExistsParameters {
         @Getter private String userKey;
         @Getter private String connObjectKeyValue;
+        @Getter private String resourceKey;
         @Getter private boolean expected;
         @Getter private Collection<LinkedAccountParam> linkedAccounts;
+        @Getter private boolean expectedEmpty;
     }
 
 

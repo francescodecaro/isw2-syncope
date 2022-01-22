@@ -342,11 +342,13 @@ public class JPAUserDAO extends AbstractAnyDAO<User> implements UserDAO {
         try {
             int maxPPSpecHistory = 0;
             for (PasswordPolicy policy : getPasswordPolicies(user)) {
+//                System.out.println("[PASSWORD POLICY] " + user.getUsername() + ";" + policy.getKey());
                 if (user.getPassword() == null && !policy.isAllowNullPassword()) {
                     throw new PasswordPolicyException("Password mandatory");
                 }
 
                 for (Implementation impl : policy.getRules()) {
+                    System.out.println("[PASSWORD POLICY] " + user.getUsername() + ";"  + user.getPassword() + ";" + policy.getKey() + ";" + impl.getBody());
                     ImplementationManager.buildPasswordRule(impl).ifPresent(rule -> {
                         rule.enforce(user);
 

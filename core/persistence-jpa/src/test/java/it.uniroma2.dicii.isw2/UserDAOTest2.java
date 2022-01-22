@@ -18,7 +18,11 @@
  */
 package it.uniroma2.dicii.isw2;
 
+import org.apache.syncope.core.persistence.api.dao.ApplicationDAO;
+import org.apache.syncope.core.persistence.api.dao.ExternalResourceDAO;
 import org.apache.syncope.core.persistence.api.dao.UserDAO;
+import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
+import org.apache.syncope.core.persistence.api.entity.user.LinkedAccount;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -40,6 +45,12 @@ public class UserDAOTest2 {
 
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private ApplicationDAO applicationDAO;
+
+    @Autowired
+    private ExternalResourceDAO externalResourceDAO;
 
     @Test
     public void testCount() {
@@ -56,7 +67,6 @@ public class UserDAOTest2 {
         assertEquals(expected.size(), countByRealm.size());
         assertEquals(expected.keySet(), countByRealm.keySet());
         countByRealm.forEach((k, v) -> {
-            System.out.println("k=" + k + "; value=" + v);
             assertEquals(expected.get(k), v);
         });
     }
@@ -70,9 +80,19 @@ public class UserDAOTest2 {
         assertEquals(expected.size(), countByStatus.size());
         assertEquals(expected.keySet(), countByStatus.keySet());
         countByStatus.forEach((k, v) -> {
-            System.out.println("k=" + k + "; value=" + v);
             assertEquals(expected.get(k), v);
         });
+    }
+
+
+    @Test
+    public void testFindLinkedAccount() {
+        List<LinkedAccount> linkedAccounts = userDAO.findLinkedAccountsByPrivilege(applicationDAO.findPrivilege("postMighty"));
+        assertEquals(1, linkedAccounts.size());
+
+        ExternalResource externalResource = externalResourceDAO.find("ws-target-resource-timeout");
+        linkedAccounts = userDAO.findLinkedAccountsByResource(externalResource);
+        assertEquals(1, linkedAccounts.size());
     }
 
 }

@@ -58,10 +58,17 @@ public class TestInitializer implements InitializingBean {
         contentLoader.load(
                 SyncopeConstants.MASTER_DOMAIN,
                 domainHolder.getDomains().get(SyncopeConstants.MASTER_DOMAIN));
+
         if (domainHolder.getDomains().containsKey("Two")) {
             contentLoader.load(
                     "Two",
                     domainHolder.getDomains().get("Two"));
         }
+
+//        if (domainHolder.getDomains().containsKey("Three")) {
+//            contentLoader.load(
+//                    "Three",
+//                    domainHolder.getDomains().get("Three"));
+//        }
     }
 }
