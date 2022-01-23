@@ -33,6 +33,7 @@ import org.apache.syncope.core.persistence.api.entity.user.UMembership;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -48,7 +49,6 @@ import javax.persistence.EntityExistsException;
 import java.util.*;
 
 import static org.junit.Assert.*;
-
 
 @RunWith(Parameterized.class)
 @ContextConfiguration(classes = { PersistenceTestContext.class })
@@ -231,8 +231,6 @@ public class UserDAOSaveTest {
 
         afterCount = userDAO.count();
         assertEquals(beforeCount, afterCount);
-
-
     }
 
     @AllArgsConstructor

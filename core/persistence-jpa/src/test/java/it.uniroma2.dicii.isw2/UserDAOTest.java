@@ -391,7 +391,7 @@ public class UserDAOTest {
 
         ExternalResource externalResource = externalResourceDAO.find(linkedAccountExistsParameters.getResourceKey());
         assertEquals(linkedAccountExistsParameters.isExpectedEmpty(),
-                userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
+        userDAO.findLinkedAccount(externalResource, linkedAccountExistsParameters.getConnObjectKeyValue()).isEmpty());
     }
 
 

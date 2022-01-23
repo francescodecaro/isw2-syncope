@@ -22,6 +22,7 @@ import org.apache.syncope.common.lib.types.SRARouteType;
 import org.apache.syncope.core.persistence.api.dao.SRARouteDAO;
 import org.apache.syncope.core.persistence.api.entity.SRARoute;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

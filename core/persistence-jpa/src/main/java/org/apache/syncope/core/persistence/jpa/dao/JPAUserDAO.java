@@ -244,9 +244,6 @@ public class JPAUserDAO extends AbstractAnyDAO<User> implements UserDAO {
         TypedQuery<User> query = entityManager().createQuery(
                 "SELECT e FROM " + anyUtils().anyClass().getSimpleName()
                 + " e WHERE e.token LIKE :token", User.class);
-
-        LOG.debug("TOKEN_QUERY: " + "SELECT e FROM " + anyUtils().anyClass().getSimpleName()
-                + " e WHERE e.token LIKE :token");
         query.setParameter("token", token);
 
         User result = null;

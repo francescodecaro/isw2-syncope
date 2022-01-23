@@ -50,7 +50,7 @@ public class PersistenceTestContext {
         DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 
         List<Resource> locations = new ArrayList<>();
-        for (String location : System.getProperty("CORE_PROPERTIES").split(",")) {
+        for (String location : System.getProperty("CORE_PROPERTIES", "classpath:core-test.properties").split(",")) {
             locations.add(resourceLoader.getResource(location));
         }
         ppc.setLocations(locations.toArray(new Resource[0]));

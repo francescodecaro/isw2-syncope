@@ -146,6 +146,16 @@ under the License.
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.pitest</groupId>
+      <artifactId>pitest-maven</artifactId>
+      <version>1.7.2</version>
+      <type>maven-plugin</type>
+    </dependency>
   </dependencies>
 
   <build>
@@ -197,6 +207,28 @@ under the License.
       </plugin>
 
       <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.7.2</version>
+        <configuration>
+          <verbose>true</verbose>
+          <targetClasses>
+            <param>org.apache.syncope.core.persistence.jpa.dao.JPAUserDAO</param>
+            <param>org.apache.syncope.core.persistence.jpa.dao.JPASRARouteDAO</param>
+          </targetClasses>
+          <targetTests>
+            <param>it.uniroma2.dicii.isw2.SRARouteDAOTest</param>
+            <param>it.uniroma2.dicii.isw2.SRARouteDAOTest2</param>
+            <param>it.uniroma2.dicii.isw2.UserDAOSaveTest</param>
+            <param>it.uniroma2.dicii.isw2.UserDAOTest</param>
+            <param>it.uniroma2.dicii.isw2.UserDAOTest2</param>
+
+          </targetTests>
+          <timeoutFactor>1000</timeoutFactor>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
@@ -211,7 +243,7 @@ under the License.
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
-        <filtering>true</filtering>        
+        <filtering>true</filtering>
       </testResource>
     </testResources>
   </build>
