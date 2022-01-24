@@ -214,7 +214,6 @@ under the License.
                username="rossini" creator="admin" lastModifier="admin"
                token="f21d52aa-e39e-4ec4-b3ed-21e3d3bd269a"
                creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
-
   <SyncopeUser_SyncopeRole user_id="1417acbe-cbf6-4277-9372-e75e04f97000" role_id="Other"/>
   <SyncopeUser mustChangePassword="0" id="74cd8ece-715a-44a4-a736-e17b46c4e7e6" status="active"
                password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
@@ -2574,5 +2573,34 @@ $$ }&#10;
                  connObjectKeyValue="connObjectKeyValue" suspended="0" owner_id="1417acbe-cbf6-4277-9372-e75e04f97000"
                  resource_id="ws-target-resource-timeout" />
   <LinkedAccount_Privilege linked_account_id="80a94db3-32f9-4ca6-b1af-e932448c666e" privilege_id="postMighty"/>
+
+  <LinkedAccount id="9b21ca27-4d2a-43e5-836f-90f2e68e2269" cipherAlgorithm="SHA1"
+                 connObjectKeyValue="connObjectKeyValue2" suspended="0" owner_id="1417acbe-cbf6-4277-9372-e75e04f97000"
+                 resource_id="ws-target-resource-1" />
+  <LinkedAccount_Privilege linked_account_id="9b21ca27-4d2a-43e5-836f-90f2e68e2269" privilege_id="postMighty"/>
+<!--  <LinkedAccount id="3839d436-6fed-4097-b7a7-4e50cdf4d445" cipherAlgorithm="SHA1"-->
+<!--                 username="!rossini"-->
+<!--                 connObjectKeyValue="connObjectKeyValue5" suspended="0" owner_id="1417acbe-cbf6-4277-9372-e75e04f97000"-->
+<!--                 resource_id="ws-target-resource-2" />-->
+<!--  <LinkedAccount_Privilege linked_account_id="3839d436-6fed-4097-b7a7-4e50cdf4d445" privilege_id="postMighty"/>-->
+
+
+  <SyncopeUser_ExternalResource user_id="c9b2dec2-00a7-4855-97c0-d854842b4b24" resource_id="resource-testdb2"/>
+  <SyncopeUser_ExternalResource user_id="c9b2dec2-00a7-4855-97c0-d854842b4b24" resource_id="ws-target-resource-delete"/>
+  <SyncopeUser_ExternalResource user_id="c9b2dec2-00a7-4855-97c0-d854842b4b24" resource_id="ws-target-resource-2"/>
+  <SyncopeUser_ExternalResource user_id="c9b2dec2-00a7-4855-97c0-d854842b4b24" resource_id="ws-target-resource-1"/>
+
+
+  <SyncopeUser mustChangePassword="0" id="416300fd-8a18-4f00-8b35-159235c12f7a" status="active"
+               password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
+               realm_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+               username="!rossini" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+
+  <LinkedAccount id="fd137da6-8fee-43f2-906e-e2749832fc5b" cipherAlgorithm="SHA1"
+                 username="!rossini"
+                 connObjectKeyValue="connObjectKeyValue4" suspended="0" owner_id="416300fd-8a18-4f00-8b35-159235c12f7a"
+                 resource_id="ws-target-resource-2" />
+  <LinkedAccount_Privilege linked_account_id="fd137da6-8fee-43f2-906e-e2749832fc5b" privilege_id="postMighty"/>
 
 </dataset>

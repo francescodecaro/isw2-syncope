@@ -28,6 +28,7 @@ import lombok.Data;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.syncope.common.lib.types.CipherAlgorithm;
+import org.apache.syncope.core.persistence.api.attrvalue.validation.InvalidEntityException;
 import org.apache.syncope.core.persistence.api.dao.*;
 import org.apache.syncope.core.persistence.api.entity.Realm;
 import org.apache.syncope.core.persistence.api.entity.Role;
@@ -38,6 +39,7 @@ import org.apache.syncope.core.persistence.api.entity.user.SecurityQuestion;
 import org.apache.syncope.core.persistence.api.entity.user.UMembership;
 import org.apache.syncope.core.persistence.api.entity.user.User;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
+import org.apache.syncope.core.spring.policy.AccountPolicyException;
 import org.apache.syncope.core.spring.security.DelegatedAdministrationException;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -93,6 +95,21 @@ public class UserDAOTest {
                 "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
                 CipherAlgorithm.SHA1);
 
+        UserParam userRossiniInvalidUsername = new UserParam("416300fd-8a18-4f00-8b35-159235c12f7a",
+                "rossini", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam userBellini = new UserParam("c9b2dec2-00a7-4855-97c0-d854842b4b24",
+                "bellini", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam userPuccini = new UserParam("823074dc-d280-436d-a7dd-07399fae48ec",
+                "puccini", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
         Collection<RoleParam> rossiniRoles = Arrays.asList(
                 new RoleParam(
                         "Other",
@@ -111,6 +128,21 @@ public class UserDAOTest {
         );
 
 
+        Collection<String> rossiniResources = Arrays.asList("resource-testdb2", "ws-target-resource-timeout");
+        Collection<String> belliniResources = Arrays.asList(
+                "resource-testdb2",
+                "ws-target-resource-delete",
+                "ws-target-resource-2",
+                "ws-target-resource-1",
+                "ws-target-resource-nopropagation"
+        );
+
+        Collection<String> pucciniResources = Arrays.asList(
+                "resource-testdb2"
+        );
+
+
+
         Set<String> validAuthRealmsSet = new HashSet<>();
         validAuthRealmsSet.add("c5b75db1-fce7-470f-b780-3b9934d82a9d");
         validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28");
@@ -121,9 +153,16 @@ public class UserDAOTest {
         });
 
 
-        Collection<LinkedAccountParam> linkedAccountsParam = Arrays.asList(
+        Collection<LinkedAccountParam> rossiniLinkedAccountsParam = Arrays.asList(
                 new LinkedAccountParam("connObjectKeyValue",
-                userRossini.getKey(), false)
+                userRossini.getKey(), false),
+                new LinkedAccountParam("connObjectKeyValue2",
+                        userRossini.getKey(), false)
+        );
+
+        Collection<LinkedAccountParam> rossiniInvalidUsernameLinkedAccountsParam = Arrays.asList(
+                new LinkedAccountParam("connObjectKeyValue4",
+                        userRossini.getKey(), false)
         );
 
         return Arrays.asList(new Object[][]{
@@ -171,8 +210,9 @@ public class UserDAOTest {
                     new SecurityChecksParameters(validAuthRealmsSet, "1417acbe-cbf6-4277-9372-e75e04f97000", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, false),
                     new FindByTokenParameters("f21d52aa-e39e-4ec4-b3ed-21e3d3bd269a", userRossini, false ),
                     new FindBySecurityQuestionParameters("887028ea-66fc-41e7-b397-620d7ea6dfbb", 0 ),
-                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
-                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue", "ws-target-resource-timeout", true, linkedAccountsParam, false)
+                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                    new FindAllResourcesParameters(userRossini,  rossiniResources, true, DelegatedAdministrationException.class),
+                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue", "ws-target-resource-timeout", true, rossiniLinkedAccountsParam, false)
                 },
                 {
                     new FindKeyParameters("", null, null ),
@@ -181,31 +221,34 @@ public class UserDAOTest {
                     new FindMembershipParameters("", true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters("", null, true ),
-                    new FindBySecurityQuestionParameters("", 5 ),
-                    new FindAllRolesAndGroupsParameters(null, Collections.emptyList(), true, Collections.emptyList()),
+                    new FindBySecurityQuestionParameters("", 6 ),
+                    new FindAllRolesAndGroupsParameters(null, Collections.emptyList(), true, Collections.emptyList(), Collections.emptyList()),
+                    new FindAllResourcesParameters(null,  Collections.emptyList(), true, NullPointerException.class),
                     new LinkedAccountExistsParameters("", "", "", false, Collections.emptyList(), true)
                 },
                 {
                     new FindKeyParameters(null, null, null ),
-                    new FindAllParameters(2, 3, 2 ),
+                    new FindAllParameters(2, 3, 3 ),
                     new FindUsernameParameters(null, null, null, null, true ),
                     new FindMembershipParameters(null, true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters(null, null, true ),
-                    new FindBySecurityQuestionParameters(null, 5 ),
-                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
+                    new FindBySecurityQuestionParameters(null, 6 ),
+                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                    new FindAllResourcesParameters(userBellini,  belliniResources, true, DelegatedAdministrationException.class),
                     new LinkedAccountExistsParameters(null, null, null, false, Collections.emptyList(), true)
                 },
                 {
                     new FindKeyParameters("verd", null, null ),
                     new FindAllParameters(2, 10, 0 ),
-                    new FindUsernameParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, null, null, true ),
+                    new FindUsernameParameters("416300fd-8a18-4f00-8b35-159235c12f7a", "!rossini", lastChange, null, true ),
                     new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                     new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
-                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 5 ),
-                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups),
-                    new LinkedAccountExistsParameters(userRossini.getKey(), "connObjectKeyValue2", "ws-target-resource-timeout", false, linkedAccountsParam, true)
+                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 6 ),
+                    new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                    new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                    new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
                 },
 
 
@@ -238,7 +281,12 @@ public class UserDAOTest {
     public FindAllRolesAndGroupsParameters findAllRolesAndGroupsParameters;
 
     @Parameterized.Parameter(value = 8)
+    public FindAllResourcesParameters findAllResourcesParameters;
+
+    @Parameterized.Parameter(value = 9)
     public LinkedAccountExistsParameters linkedAccountExistsParameters;
+
+
 
     @Test
     public void findKeyAndByUsername() {
@@ -281,7 +329,7 @@ public class UserDAOTest {
             assertEquals(findUsernameParameters.getExpectedPolicies().getLeft(), policies.getLeft());
             assertEquals(findUsernameParameters.getExpectedPolicies().getRight(), policies.getRight());
 
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | AccountPolicyException | InvalidEntityException e) {
             if (findUsernameParameters.isExpectToThrowException()) {
                 assertTrue(true);
             } else {
@@ -358,6 +406,7 @@ public class UserDAOTest {
                 });
 
                 Collection<Group> groups = userDAO.findAllGroups(user);
+
                 assertEquals(findAllRolesAndGroupsParameters.getExpectedGroups().size(), groups.size());
                 groups.forEach(group -> {
                     GroupParam expectedGroup = findAllRolesAndGroupsParameters.getExpectedGroups().stream()
@@ -368,12 +417,54 @@ public class UserDAOTest {
                     assertEquals(expectedGroup.getCreator(), group.getCreator());
                     assertEquals(expectedGroup.getLastModifier(), group.getLastModifier());
                 });
+
+                Collection<String> groupsKeys = userDAO.findAllGroupKeys(user);
+                Collection<String> groupsNames = userDAO.findAllGroupNames(user);
+
+                assertEquals(findAllRolesAndGroupsParameters.getExpectedGroups().size(), groupsKeys.size());
+                assertEquals(
+                        findAllRolesAndGroupsParameters.getExpectedGroups().stream().map(g -> g.getKey()).collect(Collectors.toList()),
+                        groupsKeys);
+
+                assertEquals(findAllRolesAndGroupsParameters.getExpectedGroups().size(), groupsNames.size());
+                assertEquals(
+                        findAllRolesAndGroupsParameters.getExpectedGroups().stream().map(g -> g.getName()).collect(Collectors.toList()),
+                        groupsNames);
+
+
             } else {
                 Collection<Role> roles = userDAO.findAllRoles(null);
                 assertNull(roles);
             }
         } catch (NullPointerException e) {
             if (findAllRolesAndGroupsParameters.isExpectToThrowException()) {
+                assertTrue(true);
+            } else {
+                fail();
+            }
+        }
+    }
+
+    @Test
+    public void testFindAllResources() {
+        try {
+            User user = userDAO.find(findAllResourcesParameters.getUser() != null ? findAllResourcesParameters.getUser().getKey() : null);
+
+            Collection<ExternalResource> resources = userDAO.findAllResources(user);
+            assertEquals(findAllResourcesParameters.getExpectedResources().size(), resources.size());
+
+
+            Collection<String> resourcesKeys = userDAO.findAllResourceKeys(user.getKey());
+            assertEquals(findAllResourcesParameters.getExpectedResources().size(), resourcesKeys.size());
+            assertEquals(findAllResourcesParameters.getExpectedResources(), resourcesKeys);
+        } catch (DelegatedAdministrationException e) {
+            if (findAllResourcesParameters.isExpectToThrowException() && findAllResourcesParameters.getExpectedException().equals(DelegatedAdministrationException.class)) {
+                assertTrue(true);
+            } else {
+                fail();
+            }
+        } catch (NullPointerException e) {
+            if (findAllResourcesParameters.isExpectToThrowException() && findAllResourcesParameters.getExpectedException().equals(NullPointerException.class)) {
                 assertTrue(true);
             } else {
                 fail();
@@ -471,7 +562,17 @@ public class UserDAOTest {
         @Getter private Collection<RoleParam> expectedRoles;
         @Getter private boolean expectToThrowException;
         @Getter private Collection<GroupParam> expectedGroups;
+        @Getter private Collection<String> expectedResources;
     }
+
+    @AllArgsConstructor
+    static class FindAllResourcesParameters {
+        @Getter private UserParam user;
+        @Getter private Collection<String> expectedResources;
+        @Getter private boolean expectToThrowException;
+        @Getter private Class<? extends Exception> expectedException;
+    }
+
 
     @AllArgsConstructor
     static class LinkedAccountExistsParameters {

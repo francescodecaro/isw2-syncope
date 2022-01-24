@@ -54,14 +54,14 @@ public class UserDAOTest2 {
 
     @Test
     public void testCount() {
-        assertEquals(5, userDAO.count());
+        assertEquals(6, userDAO.count());
     }
 
     @Test
     public void testCountByRealm() {
         Map<String, Integer> countByRealm = userDAO.countByRealm();
         Map<String, Integer> expected = new HashMap<>();
-        expected.put("/even", 1);
+        expected.put("/even", 2);
         expected.put("/", 4);
 
         assertEquals(expected.size(), countByRealm.size());
@@ -75,7 +75,7 @@ public class UserDAOTest2 {
     public void testCountByStatus() {
         Map<String, Integer> countByStatus = userDAO.countByStatus();
         Map<String, Integer> expected = new HashMap<>();
-        expected.put("active", 5);
+        expected.put("active", 6);
 
         assertEquals(expected.size(), countByStatus.size());
         assertEquals(expected.keySet(), countByStatus.keySet());
@@ -88,7 +88,7 @@ public class UserDAOTest2 {
     @Test
     public void testFindLinkedAccount() {
         List<LinkedAccount> linkedAccounts = userDAO.findLinkedAccountsByPrivilege(applicationDAO.findPrivilege("postMighty"));
-        assertEquals(1, linkedAccounts.size());
+        assertEquals(3, linkedAccounts.size());
 
         ExternalResource externalResource = externalResourceDAO.find("ws-target-resource-timeout");
         linkedAccounts = userDAO.findLinkedAccountsByResource(externalResource);
