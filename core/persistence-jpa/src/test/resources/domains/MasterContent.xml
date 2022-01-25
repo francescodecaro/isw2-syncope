@@ -134,7 +134,8 @@ under the License.
          parent_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
          accountPolicy_id="20ab5a8c-4b0c-432c-b957-f7fb9784d9f7"
          passwordPolicy_id="ce93fcda-dc3a-4369-a7b0-a6108c261c85"/>
-  
+
+
   <AnyObject id="fc6dbc3a-6c07-4965-8781-921e7401a4a5" name="HP LJ 1300n"
              realm_id="e4c28e7a-9dbf-4ee7-9441-93812a0d4a28" type_id="PRINTER"
              creator="admin" lastModifier="admin" 
@@ -2575,14 +2576,17 @@ $$ }&#10;
   <LinkedAccount_Privilege linked_account_id="80a94db3-32f9-4ca6-b1af-e932448c666e" privilege_id="postMighty"/>
 
   <LinkedAccount id="9b21ca27-4d2a-43e5-836f-90f2e68e2269" cipherAlgorithm="SHA1"
+                 password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8"
                  connObjectKeyValue="connObjectKeyValue2" suspended="0" owner_id="1417acbe-cbf6-4277-9372-e75e04f97000"
                  resource_id="ws-target-resource-1" />
   <LinkedAccount_Privilege linked_account_id="9b21ca27-4d2a-43e5-836f-90f2e68e2269" privilege_id="postMighty"/>
-<!--  <LinkedAccount id="3839d436-6fed-4097-b7a7-4e50cdf4d445" cipherAlgorithm="SHA1"-->
-<!--                 username="!rossini"-->
-<!--                 connObjectKeyValue="connObjectKeyValue5" suspended="0" owner_id="1417acbe-cbf6-4277-9372-e75e04f97000"-->
-<!--                 resource_id="ws-target-resource-2" />-->
-<!--  <LinkedAccount_Privilege linked_account_id="3839d436-6fed-4097-b7a7-4e50cdf4d445" privilege_id="postMighty"/>-->
+
+
+  <LinkedAccount id="3839d436-6fed-4097-b7a7-4e50cdf4d445" cipherAlgorithm="SHA1"
+                 username="!rossini"
+                 connObjectKeyValue="connObjectKeyValue5" suspended="0" owner_id="c9b2dec2-00a7-4855-97c0-d854842b4b24"
+                 resource_id="ws-target-resource-2" />
+  <LinkedAccount_Privilege linked_account_id="9b21ca27-4d2a-43e5-836f-90f2e68e2269" privilege_id="postMighty"/>
 
 
   <SyncopeUser_ExternalResource user_id="c9b2dec2-00a7-4855-97c0-d854842b4b24" resource_id="resource-testdb2"/>
@@ -2602,5 +2606,61 @@ $$ }&#10;
                  connObjectKeyValue="connObjectKeyValue4" suspended="0" owner_id="416300fd-8a18-4f00-8b35-159235c12f7a"
                  resource_id="ws-target-resource-2" />
   <LinkedAccount_Privilege linked_account_id="fd137da6-8fee-43f2-906e-e2749832fc5b" privilege_id="postMighty"/>
+
+
+  <SyncopeUser mustChangePassword="0" id="9a5c04a0-225a-4884-8771-9161e002b431" status="active"
+               password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
+               realm_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+               creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+  <DynRoleMembers role_id="wrong" any_id="9a5c04a0-225a-4884-8771-9161e002b431" />
+  <DynRoleMembers role_id="Other" any_id="9a5c04a0-225a-4884-8771-9161e002b431" />
+  <UDynGroupMembers group_id="37d15e4c-cdc1-460b-a591-8505c8133806" any_id="9a5c04a0-225a-4884-8771-9161e002b431" />
+  <UDynGroupMembers group_id="37d15e4c-cdc1-460b-a591-8505c8133806" any_id="" />
+  <UDynGroupMembers group_id="wrong-groupId" any_id="9a5c04a0-225a-4884-8771-9161e002b431" />
+
+  <SyncopeUser mustChangePassword="0" id="e4ed422c-c367-41c1-8dfc-fa7136893247" status="active"
+               password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
+               realm_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+               username="anonymous" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+
+  <SyncopeUser mustChangePassword="0" id="6f350d35-8230-4c8a-b724-d3c50781bfe1" status="active"
+               password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
+               realm_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+               username="admin" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+
+
+
+  <PasswordPolicy id="a4e41b43-d30e-4279-b6da-3ee0b96dde5a" name="a password policy"
+                  historyLength="1" allowNullPassword="0"/>
+  <Implementation id="NotNullPasswordRuleConf" type="PASSWORD_RULE" engine="JAVA"
+                  body='{"_class":"org.apache.syncope.common.lib.policy.DefaultPasswordRuleConf","maxLength":0,"minLength":8,"nonAlphanumericRequired":false,"alphanumericRequired":false,"digitRequired":false,"lowercaseRequired":false,"uppercaseRequired":false,"mustStartWithDigit":false,"mustntStartWithDigit":false,"mustEndWithDigit":false,"mustntEndWithDigit":false,"mustStartWithNonAlpha":false,"mustStartWithAlpha":false,"mustntStartWithNonAlpha":false,"mustntStartWithAlpha":false,"mustEndWithNonAlpha":false,"mustEndWithAlpha":false,"mustntEndWithNonAlpha":false,"mustntEndWithAlpha":false,"wordsNotPermitted":[],"schemasNotPermitted":[],"prefixesNotPermitted":["notpermitted1","notpermitted2"],"suffixesNotPermitted":[]}'/>
+  <PasswordPolicyRule policy_id="a4e41b43-d30e-4279-b6da-3ee0b96dde5a" implementation_id="NotNullPasswordRuleConf"/>
+
+  <Realm id="bb665391-1689-405c-84ca-cbc633d17cff" name="three"
+         parent_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+         accountPolicy_id="20ab5a8c-4b0c-432c-b957-f7fb9784d9f7"
+         passwordPolicy_id="a4e41b43-d30e-4279-b6da-3ee0b96dde5a"/>
+
+
+  <SyncopeUser mustChangePassword="0" id="496ca641-2aaa-4443-870b-1eacad703ad5" status="active"
+               cipherAlgorithm="SHA1"
+               realm_id="bb665391-1689-405c-84ca-cbc633d17cff"
+               username="nullPassword" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+
+  <SyncopeUser mustChangePassword="0" id="45fa1afc-f667-4b5b-9a8d-edbd64b11f57" status="active"
+               cipherAlgorithm="SHA1"
+               realm_id="c5b75db1-fce7-470f-b780-3b9934d82a9d"
+               username="nullPasswordAllowPolicyUser" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
+
+  <SyncopeUser mustChangePassword="0" id="a2028c09-a748-447c-ab83-a6b2602a7943" status="active"
+               password="5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8" cipherAlgorithm="SHA1"
+               realm_id="bb665391-1689-405c-84ca-cbc633d17cff"
+               username="notAllowNullPasswordPolicyUser" creator="admin" lastModifier="admin"
+               creationDate="2010-10-20 11:00:00" lastChangeDate="2010-10-20 11:00:00" suspended="0"/>
 
 </dataset>

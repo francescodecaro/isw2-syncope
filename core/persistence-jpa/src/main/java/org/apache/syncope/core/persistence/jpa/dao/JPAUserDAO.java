@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -190,6 +191,7 @@ public class JPAUserDAO extends AbstractAnyDAO<User> implements UserDAO {
             final Collection<String> groups) {
 
         // 1. check if AuthContextUtils.getUsername() is owner of at least one group of which user is member
+        List<Optional<Pair<String, String>>> test = authRealms.stream().map(RealmUtils::parseGroupOwnerRealm).collect(Collectors.toList());
         boolean authorized = authRealms.stream().map(RealmUtils::parseGroupOwnerRealm).filter(Optional::isPresent).
                 anyMatch(pair -> groups.contains(pair.get().getRight()));
 
@@ -339,6 +341,8 @@ public class JPAUserDAO extends AbstractAnyDAO<User> implements UserDAO {
         try {
             int maxPPSpecHistory = 0;
             for (PasswordPolicy policy : getPasswordPolicies(user)) {
+                String password = user.getPassword();
+                boolean allow = policy.isAllowNullPassword();
                 if (user.getPassword() == null && !policy.isAllowNullPassword()) {
                     throw new PasswordPolicyException("Password mandatory");
                 }

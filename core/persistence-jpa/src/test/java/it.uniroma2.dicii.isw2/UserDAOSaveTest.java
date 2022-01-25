@@ -24,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.syncope.common.lib.types.CipherAlgorithm;
 import org.apache.syncope.core.persistence.api.attrvalue.validation.InvalidEntityException;
 import org.apache.syncope.core.persistence.api.dao.*;
+import org.apache.syncope.core.persistence.api.entity.AccessToken;
 import org.apache.syncope.core.persistence.api.entity.EntityFactory;
 import org.apache.syncope.core.persistence.api.entity.Realm;
 import org.apache.syncope.core.persistence.api.entity.RelationshipType;
@@ -74,6 +75,9 @@ public class UserDAOSaveTest {
     private GroupDAO groupDAO;
 
     @Autowired
+    private AccessTokenDAO accessTokenDAO;
+
+    @Autowired
     private ExternalResourceDAO externalResourceDAO;
 
     @Autowired
@@ -108,84 +112,84 @@ public class UserDAOSaveTest {
                             "encodedPassword", CipherAlgorithm.SHA,
                             true, new Date(), "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                             "securityAnswer", 0, new Date(),
-                            true, 1, null)
+                            true, true,1, null)
                 },
                 {
                         new SaveParameters("", "", "",
                                 "", CipherAlgorithm.SHA1,
                                 false, null, "",
                                 "", -1, null,
-                                false, 0, InvalidEntityException.class)
+                                false, false, 0, InvalidEntityException.class)
                 },
                 {
                         new SaveParameters(null, null,null,
                                 null, CipherAlgorithm.SHA256,
                                 false, null, null,
                                 null, -1, null,
-                                false, 0, InvalidEntityException.class)
+                                false, true, 0, InvalidEntityException.class)
                 },
                 {
                         new SaveParameters("rossini", "c5b75db1-fce7-470f-b780-3b9934d82a9d", "password",
                                 "encodedPassword", CipherAlgorithm.SHA512,
                                 false, futureDate, "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", 2, futureDate,
-                                false, 0, EntityExistsException.class)
+                                false, true, 0, EntityExistsException.class)
                  },
                 {
                         new SaveParameters("username2", "c5b75db1-fce7-470f-b780-3b9934d82a9d", "pass",
                                 "pass", CipherAlgorithm.AES,
                                 false, pastDate, "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", 2, pastDate,
-                                false, 1, InvalidEntityException.class)
+                                false, false, 1, InvalidEntityException.class)
                 },
                 {
                         new SaveParameters("username3", "c5b75db1-fce7-470f-b780-3b9934d82a9d", "password01",
                                 "encodedPassword", CipherAlgorithm.AES,
                                 false, new Date(), UUID.randomUUID().toString(),
                                 "securityAnswer", 2, new Date(),
-                                true, 1, null)
+                                true, false, 1, null)
                 },
                 {
                         new SaveParameters("username4", "0679e069-7355-4b20-bd11-a5a0a5453c7c", "password01",
                                 "encodedPassword", CipherAlgorithm.SMD5,
                                 true, new Date(), "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", 2, new Date(),
-                                false, 1, null)
+                                false, true,1, null)
                 },
                 {
                         new SaveParameters("username5", "0679e069-7355-4b20-bd11-a5a0a5453c7c", "password01",
                                 "encodedPassword", CipherAlgorithm.SSHA,
                                 true, new Date(), UUID.randomUUID().toString(),
                                 "securityAnswer", 2, new Date(),
-                                false, 1,  null)
+                                false, true,1,  null)
                 },
                 {
                         new SaveParameters("username6", "e4c28e7a-9dbf-4ee7-9441-93812a0d4a28", "password01",
                                 "encodedPassword", CipherAlgorithm.SSHA1,
                                 true, new Date(), "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", Integer.MAX_VALUE, new Date(),
-                                false, 1,  null)
+                                false, true,1,  null)
                 },
                 {
                         new SaveParameters("username7", "722f3d84-9c2b-4525-8f6e-e4b82c55a36c", "password01",
                                 "encodedPassword", CipherAlgorithm.SSHA256,
                                 true, new Date(), "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", Integer.MIN_VALUE, new Date(),
-                                false, 1,  null)
+                                false, false, 1,  null)
                 },
                 {
                         new SaveParameters("username8", "722f3d84-9c2b-4525-8f6e-e4b82c55a36c", "password01",
                                 "encodedPassword", CipherAlgorithm.SSHA512,
                                 true, new Date(), UUID.randomUUID().toString(),
                                 "securityAnswer", 0, new Date(),
-                                false, 1,  null)
+                                false, false,1,  null)
                 },
                 {
                         new SaveParameters("username9", "e4c28e7a-9dbf-4ee7-9441-93812a0d4a28","password01",
                                 "encodedPassword", CipherAlgorithm.BCRYPT,
                                 true, new Date(), "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", 5, new Date(),
-                                false, 1,  null)
+                                false, true,1,  null)
                 },
 
         });
@@ -221,6 +225,14 @@ public class UserDAOSaveTest {
 
         user = userDAO.save(user);
 
+        if (saveParameters.isSaveAccessToken()) {
+            AccessToken accessToken = entityFactory.newEntity(AccessToken.class);
+            accessToken.setOwner(user.getUsername());
+            accessToken.setKey("access-token");
+            accessTokenDAO.save(accessToken);
+        }
+
+
         int afterCount = userDAO.count();
         assertEquals(beforeCount + saveParameters.getExpectedIncrement(), afterCount);
 
@@ -247,6 +259,8 @@ public class UserDAOSaveTest {
         @Getter private int failedLogins;
         @Getter private Date lastLoginDate;
         @Getter private boolean mustChangePassword;
+
+        @Getter private boolean saveAccessToken;
 
         @Getter private int expectedIncrement;
         @Getter private Class<? extends Exception> expectedException;

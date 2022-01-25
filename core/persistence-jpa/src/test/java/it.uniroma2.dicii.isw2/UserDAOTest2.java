@@ -21,6 +21,7 @@ package it.uniroma2.dicii.isw2;
 import org.apache.syncope.core.persistence.api.dao.ApplicationDAO;
 import org.apache.syncope.core.persistence.api.dao.ExternalResourceDAO;
 import org.apache.syncope.core.persistence.api.dao.UserDAO;
+import org.apache.syncope.core.persistence.api.entity.group.Group;
 import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
 import org.apache.syncope.core.persistence.api.entity.user.LinkedAccount;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
@@ -54,15 +55,16 @@ public class UserDAOTest2 {
 
     @Test
     public void testCount() {
-        assertEquals(6, userDAO.count());
+        assertEquals(12, userDAO.count());
     }
 
     @Test
     public void testCountByRealm() {
         Map<String, Integer> countByRealm = userDAO.countByRealm();
         Map<String, Integer> expected = new HashMap<>();
-        expected.put("/even", 2);
+        expected.put("/even", 6);
         expected.put("/", 4);
+        expected.put("/even/three", 2);
 
         assertEquals(expected.size(), countByRealm.size());
         assertEquals(expected.keySet(), countByRealm.keySet());
@@ -75,7 +77,7 @@ public class UserDAOTest2 {
     public void testCountByStatus() {
         Map<String, Integer> countByStatus = userDAO.countByStatus();
         Map<String, Integer> expected = new HashMap<>();
-        expected.put("active", 6);
+        expected.put("active", 12);
 
         assertEquals(expected.size(), countByStatus.size());
         assertEquals(expected.keySet(), countByStatus.keySet());
