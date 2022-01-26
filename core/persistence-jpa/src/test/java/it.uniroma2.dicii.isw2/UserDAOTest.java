@@ -164,12 +164,32 @@ public class UserDAOTest {
                 CipherAlgorithm.SHA1);
 
         UserParam nullPasswordAllowPolicyUser = new UserParam("45fa1afc-f667-4b5b-9a8d-edbd64b11f57",
-                null, "active", false,
+                "nullPasswordAllowPolicyUser", "active", false,
                 "admin", null,
                 CipherAlgorithm.SHA1);
 
         UserParam notAllowNullPasswordPolicyUser = new UserParam("a2028c09-a748-447c-ab83-a6b2602a7943",
-                null, "active", false,
+                "notAllowNullPasswordPolicyUser", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam notAllowNullPasswordPolicyUser2 = new UserParam("253b23b8-2d7e-401e-bce8-e31f0ff6d464",
+                "notAllowNullPasswordPolicyUser2", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam notAllowNullPasswordPolicyUser3 = new UserParam("61f3189f-1a37-4a05-a41e-1d9fbb9cb4cb",
+                "notAllowNullPasswordPolicyUser3", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam notAllowNullPasswordPolicyUser4 = new UserParam("5b021352-cce0-4c0c-a44d-3891b067abba",
+                "notAllowNullPasswordPolicyUser4", "active", false,
+                "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+                CipherAlgorithm.SHA1);
+
+        UserParam realmWithNoPolicyUser = new UserParam("bd79a57d-381b-4df3-82c1-4a5105476b3e",
+                "realmWithNoPolicyUser", "active", false,
                 "admin", "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
                 CipherAlgorithm.SHA1);
 
@@ -275,7 +295,7 @@ public class UserDAOTest {
                     new FindMembershipParameters("", true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters("", null, true ),
-                    new FindBySecurityQuestionParameters("", 12 ),
+                    new FindBySecurityQuestionParameters("", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                     new FindAllRolesAndGroupsParameters(null, Collections.emptyList(), true, Collections.emptyList(), Collections.emptyList()),
                     new FindAllResourcesParameters(null,  Collections.emptyList(), true, NullPointerException.class),
                     new LinkedAccountExistsParameters("", "", "", false, Collections.emptyList(), true)
@@ -287,7 +307,7 @@ public class UserDAOTest {
                     new FindMembershipParameters(null, true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters(null, null, true ),
-                    new FindBySecurityQuestionParameters(null, 12 ),
+                    new FindBySecurityQuestionParameters(null, Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                     new FindAllResourcesParameters(userBellini,  belliniResources, true, DelegatedAdministrationException.class),
                     new LinkedAccountExistsParameters(null, null, null, false, Collections.emptyList(), true)
@@ -299,7 +319,7 @@ public class UserDAOTest {
                     new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                     new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
-                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                     new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
                     new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
@@ -317,7 +337,7 @@ public class UserDAOTest {
                     // Not Used
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                     // Not Used
-                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                    new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                     // Not Used
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                     // Not Used
@@ -338,7 +358,7 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         new FindAllRolesAndGroupsParameters(userNullUsername, userNullUsernameRoles, false, userNullUsernameGroups, userNullUsernameResources),
                         // Not Used
                         new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
@@ -358,11 +378,11 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         // Not Used
                         new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                         // Not Used
-                        new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                        new FindAllResourcesParameters(realmWithNoPolicyUser,  Collections.emptyList(), true, DelegatedAdministrationException.class),
                         // Not Used
                         new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
                 },
@@ -379,7 +399,7 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         // Not Used
                         new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                         // Not Used
@@ -400,7 +420,7 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         // Not Used
                         new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                         // Not Used
@@ -421,7 +441,7 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         // Not Used
                         new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                         // Not Used
@@ -442,7 +462,7 @@ public class UserDAOTest {
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
-                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", 12 ),
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                         // Not Used
                         new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
                         // Not Used
@@ -450,8 +470,90 @@ public class UserDAOTest {
                         // Not Used
                         new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
                 },
-
-
+                {
+                        // Not Used
+                        new FindKeyParameters("verd", null, null ),
+                        // Not Used
+                        new FindAllParameters(2, 20, 0 ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser2.getKey(), "notAllowNullPasswordPolicyUser2", lastChange, null, true ),
+                        // Not Used
+                        new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
+                        // Not Used
+                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        // Not Used
+                        new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
+                        // Not Used
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
+                        // Not Used
+                        new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                        // Not Used
+                        new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                        // Not Used
+                        new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
+                },
+                {
+                        // Not Used
+                        new FindKeyParameters("verd", null, null ),
+                        // Not Used
+                        new FindAllParameters(2, 20, 0 ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser3.getKey(), "notAllowNullPasswordPolicyUser3", lastChange, null, true ),
+                        // Not Used
+                        new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
+                        // Not Used
+                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        // Not Used
+                        new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
+                        // Not Used
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
+                        // Not Used
+                        new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                        // Not Used
+                        new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                        // Not Used
+                        new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
+                },
+                {
+                        // Not Used
+                        new FindKeyParameters("verd", null, null ),
+                        // Not Used
+                        new FindAllParameters(2, 20, 0 ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser4.getKey(), "notAllowNullPasswordPolicyUser4", lastChange, null, true ),
+                        // Not Used
+                        new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
+                        // Not Used
+                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        // Not Used
+                        new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
+                        // Not Used
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
+                        // Not Used
+                        new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                        // Not Used
+                        new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                        // Not Used
+                        new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
+                },
+                {
+                        // Not Used
+                        new FindKeyParameters("verd", null, null ),
+                        // Not Used
+                        new FindAllParameters(2, 20, 0 ),
+                        new FindUsernameParameters(realmWithNoPolicyUser.getKey(), "realmWithNoPolicyUser", lastChange, null, true ),
+                        // Not Used
+                        new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
+                        // Not Used
+                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        // Not Used
+                        new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
+                        // Not Used
+                        new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
+                        // Not Used
+                        new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
+                        // Not Used
+                        new FindAllResourcesParameters(userPuccini,  pucciniResources, true, DelegatedAdministrationException.class),
+                        // Not Used
+                        new LinkedAccountExistsParameters(userRossiniInvalidUsername.getKey(), "connObjectKeyValue3", "ws-target-resource-timeout", false, rossiniInvalidUsernameLinkedAccountsParam, true)
+                },
         });
     }
 

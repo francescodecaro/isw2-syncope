@@ -55,34 +55,28 @@ public class UserDAOTest2 {
 
     @Test
     public void testCount() {
-        assertEquals(12, userDAO.count());
+        assertEquals(Constant.USERS_COUNT, userDAO.count());
     }
 
     @Test
     public void testCountByRealm() {
         Map<String, Integer> countByRealm = userDAO.countByRealm();
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("/even", 6);
-        expected.put("/", 4);
-        expected.put("/even/three", 2);
 
-        assertEquals(expected.size(), countByRealm.size());
-        assertEquals(expected.keySet(), countByRealm.keySet());
+        assertEquals(Constant.REALM_COUNT.size(), countByRealm.size());
+        assertEquals(Constant.REALM_COUNT.keySet(), countByRealm.keySet());
         countByRealm.forEach((k, v) -> {
-            assertEquals(expected.get(k), v);
+            assertEquals(Constant.REALM_COUNT.get(k), v);
         });
     }
 
     @Test
     public void testCountByStatus() {
         Map<String, Integer> countByStatus = userDAO.countByStatus();
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("active", 12);
 
-        assertEquals(expected.size(), countByStatus.size());
-        assertEquals(expected.keySet(), countByStatus.keySet());
+        assertEquals(Constant.STATUS_COUNT.size(), countByStatus.size());
+        assertEquals(Constant.STATUS_COUNT.keySet(), countByStatus.keySet());
         countByStatus.forEach((k, v) -> {
-            assertEquals(expected.get(k), v);
+            assertEquals(Constant.STATUS_COUNT.get(k), v);
         });
     }
 
@@ -90,7 +84,7 @@ public class UserDAOTest2 {
     @Test
     public void testFindLinkedAccount() {
         List<LinkedAccount> linkedAccounts = userDAO.findLinkedAccountsByPrivilege(applicationDAO.findPrivilege("postMighty"));
-        assertEquals(3, linkedAccounts.size());
+        assertEquals((int)Constant.LINKED_ACCOUNT_COUNT_PRIVILEGE.get("postMighty"), linkedAccounts.size());
 
         ExternalResource externalResource = externalResourceDAO.find("ws-target-resource-timeout");
         linkedAccounts = userDAO.findLinkedAccountsByResource(externalResource);
