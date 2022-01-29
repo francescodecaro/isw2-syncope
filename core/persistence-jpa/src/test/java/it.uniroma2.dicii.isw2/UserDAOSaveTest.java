@@ -21,20 +21,17 @@ package it.uniroma2.dicii.isw2;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.syncope.common.lib.types.AnyTypeKind;
 import org.apache.syncope.common.lib.types.CipherAlgorithm;
+import org.apache.syncope.common.lib.types.IdRepoEntitlement;
 import org.apache.syncope.core.persistence.api.attrvalue.validation.InvalidEntityException;
 import org.apache.syncope.core.persistence.api.dao.*;
-import org.apache.syncope.core.persistence.api.entity.AccessToken;
-import org.apache.syncope.core.persistence.api.entity.EntityFactory;
-import org.apache.syncope.core.persistence.api.entity.Realm;
-import org.apache.syncope.core.persistence.api.entity.RelationshipType;
-import org.apache.syncope.core.persistence.api.entity.resource.ExternalResource;
-import org.apache.syncope.core.persistence.api.entity.user.SecurityQuestion;
-import org.apache.syncope.core.persistence.api.entity.user.UMembership;
-import org.apache.syncope.core.persistence.api.entity.user.User;
+import org.apache.syncope.core.persistence.api.entity.*;
+import org.apache.syncope.core.persistence.api.entity.anyobject.ADynGroupMembership;
+import org.apache.syncope.core.persistence.api.entity.group.Group;
+import org.apache.syncope.core.persistence.api.entity.user.*;
 import org.apache.syncope.core.persistence.jpa.PersistenceTestContext;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -46,7 +43,8 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityExistsException;
+
+import javax.persistence.PersistenceException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -72,13 +70,31 @@ public class UserDAOSaveTest {
     private SecurityQuestionDAO securityQuestionDAO;
 
     @Autowired
-    private GroupDAO groupDAO;
+    private DynRealmDAO dynRealmDAO;
 
     @Autowired
     private AccessTokenDAO accessTokenDAO;
 
     @Autowired
-    private ExternalResourceDAO externalResourceDAO;
+    private PlainSchemaDAO plainSchemaDAO;
+
+    @Autowired
+    private AnyTypeClassDAO anyTypeClassDAO;
+
+    @Autowired
+    protected AnyUtilsFactory anyUtilsFactory;
+
+    @Autowired
+    private RoleDAO roleDAO;
+
+    @Autowired
+    private GroupDAO groupDAO;
+
+    @Autowired
+    private AnyTypeDAO anyTypeDAO;
+
+    @Autowired
+    private DelegationDAO delegationDAO;
 
     @Autowired
     private EntityFactory entityFactory;
@@ -133,7 +149,7 @@ public class UserDAOSaveTest {
                                 "encodedPassword", CipherAlgorithm.SHA512,
                                 false, futureDate, "887028ea-66fc-41e7-b397-620d7ea6dfbb",
                                 "securityAnswer", 2, futureDate,
-                                false, true, 0, EntityExistsException.class)
+                                false, true, 0, PersistenceException.class)
                  },
                 {
                         new SaveParameters("username2", "c5b75db1-fce7-470f-b780-3b9934d82a9d", "pass",
@@ -205,13 +221,15 @@ public class UserDAOSaveTest {
     @Test
     public void testSave() {
         int beforeCount = userDAO.count();
+        Role reviewer = roleDAO.find("User reviewer");
 
         User user = entityFactory.newEntity(User.class);
         user.setUsername(saveParameters.getUsername());
 
         Realm realm = realmDAO.find(saveParameters.getRealmKey());
         user.setRealm(realm);
-
+        user.add(reviewer);
+        user.add(anyTypeClassDAO.find("other"));
         user.setPassword(saveParameters.getPassword(), saveParameters.getCipherAlgorithm());
         user.setSuspended(saveParameters.isSuspended());
         user.setChangePwdDate(saveParameters.getChangePwdDate());
@@ -223,7 +241,94 @@ public class UserDAOSaveTest {
         user.setLastLoginDate(saveParameters.getLastLoginDate());
         user.setMustChangePassword(saveParameters.isMustChangePassword());
 
+        UPlainAttr attr = entityFactory.newEntity(UPlainAttr.class);
+        attr.setOwner(user);
+        attr.setSchema(plainSchemaDAO.find("cool"));
+        attr.add("true", anyUtilsFactory.getInstance(AnyTypeKind.USER));
+        user.add(attr);
+
         user = userDAO.save(user);
+        String newUserKey = user.getKey();
+        assertNotNull(newUserKey);
+
+
+        // 1. create role with dynamic membership
+        Role role = entityFactory.newEntity(Role.class);
+        role.setKey("new");
+        role.add(realmDAO.find(saveParameters.getRealmKey()));
+        role.getEntitlements().add(IdRepoEntitlement.AUDIT_LIST);
+        role.getEntitlements().add(IdRepoEntitlement.AUDIT_UPDATE);
+
+        DynRoleMembership dynMembership = entityFactory.newEntity(DynRoleMembership.class);
+        dynMembership.setFIQLCond("cool==true");
+        dynMembership.setRole(role);
+
+        role.setDynMembership(dynMembership);
+
+        Role roleActual = roleDAO.saveAndRefreshDynMemberships(role);
+        assertNotNull(roleActual);
+
+        // 2. verify that dynamic membership is there
+        roleActual = roleDAO.find(roleActual.getKey());
+        assertNotNull(roleActual);
+        assertNotNull(roleActual.getDynMembership());
+        assertNotNull(roleActual.getDynMembership().getKey());
+        assertEquals(roleActual, roleActual.getDynMembership().getRole());
+
+
+        Group group = entityFactory.newEntity(Group.class);
+        group.setName("group");
+        group.setRealm(realmDAO.find(saveParameters.getRealmKey()));
+        assertNotNull(group);
+
+        UDynGroupMembership dynGroupMembership = entityFactory.newEntity(UDynGroupMembership.class);
+        dynGroupMembership.setFIQLCond("cool==true");
+        dynGroupMembership.setGroup(group);
+        group.setUDynMembership(dynGroupMembership);
+
+        group = groupDAO.saveAndRefreshDynMemberships(group);
+        assertNotNull(group);
+
+
+        DynRealm dynRealm = entityFactory.newEntity(DynRealm.class);
+        dynRealm.setKey("name");
+
+        DynRealmMembership memb = entityFactory.newEntity(DynRealmMembership.class);
+        memb.setDynRealm(dynRealm);
+        memb.setAnyType(anyTypeDAO.findUser());
+        memb.setFIQLCond("cool==true");
+
+        dynRealm.add(memb);
+        memb.setDynRealm(dynRealm);
+
+        DynRealm actualRealm = dynRealmDAO.saveAndRefreshDynMemberships(dynRealm);
+        assertNotNull(actualRealm);
+
+        Pair<Set<String>, Set<String>> dynGroupMembs = userDAO.saveAndGetDynGroupMembs(user);
+        assertNotNull(dynGroupMembs);
+
+
+        Delegation delegation = entityFactory.newEntity(Delegation.class);
+        delegation.setDelegating(user);
+        delegation.setDelegated(userDAO.findByUsername("rossini"));
+        delegation.setStart(new Date());
+        delegation.add(reviewer);
+        delegation = delegationDAO.save(delegation);
+        assertNotNull(delegation.getKey());
+
+        Delegation delegation2 = entityFactory.newEntity(Delegation.class);
+        delegation2.setDelegating(userDAO.findByUsername("bellini"));
+        delegation2.setDelegated(user);
+        delegation2.setStart(new Date());
+        delegation2.add(reviewer);
+        delegation2 = delegationDAO.save(delegation2);
+        assertNotNull(delegation2.getKey());
+
+        assertEquals(1, userDAO.findDynRoles(user.getKey()).size());
+        assertEquals(1, userDAO.findDynGroups(user.getKey()).size());
+        assertEquals(1, userDAO.findDynRealms(user.getKey()).size());
+        assertEquals(1, delegationDAO.findByDelegating(user).size());
+        assertEquals(1, delegationDAO.findByDelegated(user).size());
 
         if (saveParameters.isSaveAccessToken()) {
             AccessToken accessToken = entityFactory.newEntity(AccessToken.class);
@@ -232,7 +337,6 @@ public class UserDAOSaveTest {
             accessTokenDAO.save(accessToken);
         }
 
-
         int afterCount = userDAO.count();
         assertEquals(beforeCount + saveParameters.getExpectedIncrement(), afterCount);
 
@@ -240,6 +344,13 @@ public class UserDAOSaveTest {
 
         User actual = userDAO.find(user.getKey());
         assertNull(actual);
+
+        assertNull(accessTokenDAO.findByOwner(user.getUsername()));
+        assertEquals(0, userDAO.findDynRoles(user.getKey()).size());
+        assertEquals(0, userDAO.findDynGroups(user.getKey()).size());
+        assertEquals(0, userDAO.findDynRealms(user.getKey()).size());
+        assertEquals(0, delegationDAO.findByDelegating(user).size());
+        assertEquals(0, delegationDAO.findByDelegated(user).size());
 
         afterCount = userDAO.count();
         assertEquals(beforeCount, afterCount);

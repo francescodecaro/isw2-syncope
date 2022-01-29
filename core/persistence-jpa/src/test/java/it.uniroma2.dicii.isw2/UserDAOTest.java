@@ -215,6 +215,10 @@ public class UserDAOTest {
         validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28");
         validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28@37d15e4c-cdc1-460b-a591-8505c8133806");
 
+        Set<String> validAuthRealmsSet2 = new HashSet<>();
+        validAuthRealmsSet.add("c5b75db1-fce7-470f-b780-3b9934d82a9d");
+        validAuthRealmsSet.add("e4c28e7a-9dbf-4ee7-9441-93812a0d4a28");
+
 
         Collection<String> validGroupsSet = Arrays.asList(new String[]{
             "37d15e4c-cdc1-460b-a591-8505c8133806",
@@ -279,9 +283,9 @@ public class UserDAOTest {
                 {
                     new FindKeyParameters("rossini", "1417acbe-cbf6-4277-9372-e75e04f97000", userRossini),
                     new FindAllParameters(0, 0, 0 ),
-                    new FindUsernameParameters(userRossini.getKey(), "rossini", lastChange, Pair.of(false, false), false ),
+                    new FindUsernameParameters(userRossini.getKey(), "rossini", lastChange, Pair.of(false, false), false, "Cannot invoke \"org.apache.syncope.core.persistence.api.entity.user.User.removeClearPassword()\" because \"user\" is null" ),
                     new FindMembershipParameters("6d8a7dc0-d4bc-4b7e-b058-abcd3df28f28", false, "1417acbe-cbf6-4277-9372-e75e04f97000", "f779c0d4-633b-4be5-8f57-32eb478a3ca5"),
-                    new SecurityChecksParameters(validAuthRealmsSet, "1417acbe-cbf6-4277-9372-e75e04f97000", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, false),
+                    new SecurityChecksParameters(validAuthRealmsSet, userRossini.getKey(), "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, false),
                     new FindByTokenParameters("f21d52aa-e39e-4ec4-b3ed-21e3d3bd269a", userRossini, false ),
                     new FindBySecurityQuestionParameters("887028ea-66fc-41e7-b397-620d7ea6dfbb", 0 ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
@@ -291,7 +295,7 @@ public class UserDAOTest {
                 {
                     new FindKeyParameters("", null, null ),
                     new FindAllParameters(1, 1, 1 ),
-                    new FindUsernameParameters("", null, null, null, true),
+                    new FindUsernameParameters("", null, null, null, true, null),
                     new FindMembershipParameters("", true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters("", null, true ),
@@ -303,7 +307,7 @@ public class UserDAOTest {
                 {
                     new FindKeyParameters(null, null, userNullUsername ),
                     new FindAllParameters(2, 3, 3 ),
-                    new FindUsernameParameters(null, null, null, null, true ),
+                    new FindUsernameParameters(null, null, null, null, true, null ),
                     new FindMembershipParameters(null, true, null, null),
                     new SecurityChecksParameters(Collections.emptySet(), "", "", Collections.emptyList(), true),
                     new FindByTokenParameters(null, null, true ),
@@ -315,9 +319,9 @@ public class UserDAOTest {
                 {
                     new FindKeyParameters("verd", null, null ),
                     new FindAllParameters(2, 20, 0 ),
-                    new FindUsernameParameters(userRossiniInvalidUsername.getKey(), "!rossini", lastChange, null, true ),
+                    new FindUsernameParameters(userRossiniInvalidUsername.getKey(), "!rossini", lastChange, null, true, "User [InvalidUsername]" ),
                     new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
-                    new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                    new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                     new FindBySecurityQuestionParameters("1417acbe-cbf6-4277-9372-e75e04f9700", Constant.USERS_COUNT_NULL_SECURITY_QUESTION ),
                     new FindAllRolesAndGroupsParameters(userRossini, rossiniRoles, false, rossiniGroups, rossiniResources),
@@ -329,11 +333,10 @@ public class UserDAOTest {
                     new FindKeyParameters("verd", null, null ),
                     // Not Used
                     new FindAllParameters(2, 20, 0 ),
-                    new FindUsernameParameters(userBellini.getKey(), "bellini", lastChange, null, true ),
+                    new FindUsernameParameters(userBellini.getKey(), "bellini", lastChange, null, true, "User [InvalidUsername]" ),
                     // Not Used
                     new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
-                    // Not Used
-                    new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                    new SecurityChecksParameters(validAuthRealmsSet, userRossini.getKey(), "", validGroupsSet, false),
                     // Not Used
                     new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                     // Not Used
@@ -350,11 +353,10 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(userAdmin.getKey(), "admin", lastChange, null, true ),
+                        new FindUsernameParameters(userAdmin.getKey(), "admin", lastChange, null, true, "User [InvalidUsername]" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
-                        // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet, userRossini.getKey(), "", Collections.emptySet(), true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -370,11 +372,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(userAnonymous.getKey(), "anonymous", lastChange, null, true ),
+                        new FindUsernameParameters(userAnonymous.getKey(), "anonymous", lastChange, null, true, "User [InvalidUsername]" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, false),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -391,11 +393,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(userNullUsername.getKey(), null, lastChange, null, true ),
+                        new FindUsernameParameters(userNullUsername.getKey(), null, lastChange, null, true, "User [InvalidUsername]" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -412,11 +414,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(userNullPassword.getKey(), "nullPassword", lastChange, null, true ),
+                        new FindUsernameParameters(userNullPassword.getKey(), "nullPassword", lastChange, null, true, "User [InvalidPassword]" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -433,11 +435,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(nullPasswordAllowPolicyUser.getKey(), "nullPasswordAllowPolicyUser", lastChange, null, true ),
+                        new FindUsernameParameters(nullPasswordAllowPolicyUser.getKey(), "nullPasswordAllowPolicyUser", lastChange, Pair.of(false, false), false, "" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -454,11 +456,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(notAllowNullPasswordPolicyUser.getKey(), "notAllowNullPasswordPolicyUser", lastChange, null, true ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser.getKey(), "notAllowNullPasswordPolicyUser", lastChange, Pair.of(false, false), false, "" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -475,11 +477,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(notAllowNullPasswordPolicyUser2.getKey(), "notAllowNullPasswordPolicyUser2", lastChange, null, true ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser2.getKey(), "notAllowNullPasswordPolicyUser2", lastChange, Pair.of(false, false), false, ""  ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -496,11 +498,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(notAllowNullPasswordPolicyUser3.getKey(), "notAllowNullPasswordPolicyUser3", lastChange, null, true ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser3.getKey(), "notAllowNullPasswordPolicyUser3", lastChange, Pair.of(false, false), false , "" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -517,11 +519,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(notAllowNullPasswordPolicyUser4.getKey(), "notAllowNullPasswordPolicyUser4", lastChange, null, true ),
+                        new FindUsernameParameters(notAllowNullPasswordPolicyUser4.getKey(), "notAllowNullPasswordPolicyUser4", lastChange, Pair.of(false, true), false , "" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -538,11 +540,11 @@ public class UserDAOTest {
                         new FindKeyParameters("verd", null, null ),
                         // Not Used
                         new FindAllParameters(2, 20, 0 ),
-                        new FindUsernameParameters(realmWithNoPolicyUser.getKey(), "realmWithNoPolicyUser", lastChange, null, true ),
+                        new FindUsernameParameters(realmWithNoPolicyUser.getKey(), "realmWithNoPolicyUser", lastChange, Pair.of(false, false), false , "" ),
                         // Not Used
                         new FindMembershipParameters("40e409a4-d870-4792-b820-30668f1269b9", false, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "bf825fe1-7320-4a54-bd64-143b5c18ab97"),
                         // Not Used
-                        new SecurityChecksParameters(validAuthRealmsSet, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
+                        new SecurityChecksParameters(validAuthRealmsSet2, "c9b2dec2-00a7-4855-97c0-d854842b4b24", "c5b75db1-fce7-470f-b780-3b9934d82a9d", validGroupsSet, true),
                         // Not Used
                         new FindByTokenParameters("1417acbe-cbf6-4277-9372-e75e04f9700", null, true ),
                         // Not Used
@@ -632,6 +634,7 @@ public class UserDAOTest {
 
         } catch (NullPointerException | AccountPolicyException | InvalidEntityException e) {
             if (findUsernameParameters.isExpectToThrowException()) {
+                assertEquals(findUsernameParameters.getExpectedExceptionMessage(), e.getMessage());
                 assertTrue(true);
             } else {
                 fail();
@@ -655,6 +658,9 @@ public class UserDAOTest {
     public void testSecurityChecks() {
         try {
             userDAO.securityChecks(securityChecksParameters.getAuthRealms(), securityChecksParameters.getKey(), securityChecksParameters.getRealm(), securityChecksParameters.getGroups());
+            if (securityChecksParameters.isExpectToThrowException()) {
+                fail();
+            }
         } catch (DelegatedAdministrationException e) {
             if (securityChecksParameters.isExpectToThrowException()) {
                 assertTrue(true);
@@ -824,6 +830,7 @@ public class UserDAOTest {
         @Getter private Date expectedLastChange;
         @Getter private Pair<Boolean, Boolean> expectedPolicies;
         @Getter private boolean expectToThrowException;
+        @Getter private String expectedExceptionMessage;
     }
 
     @AllArgsConstructor
