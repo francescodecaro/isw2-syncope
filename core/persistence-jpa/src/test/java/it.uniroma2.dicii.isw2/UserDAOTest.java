@@ -607,6 +607,8 @@ public class UserDAOTest {
 
         List<String> keys = userDAO.findAllKeys(findAllParameters.getPage(), findAllParameters.getItemsPerPage());
         assertEquals(findAllParameters.getExpectedCount(), keys.size());
+
+        assertEquals(keys, users.stream().map(u -> u.getKey()).collect(Collectors.toList()));
     }
 
     @Test
